@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/build/Desktop_Qt_5_15_13-Debug",
+                "/usr/include/x86_64-linux-gnu/qt5",
+                "/usr/include/x86_64-linux-gnu/qt5/QtCore",
+                "/usr/include/x86_64-linux-gnu/qt5/QtGui",
+                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+                "/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
+                "/usr/include/x86_64-linux-gnu/qt5/QtOpenGL",
+                "/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport",
+                "/usr/include/x86_64-linux-gnu/qt5/QtSql",
+                "/usr/include/x86_64-linux-gnu/qt5/QtTest",
+                "/usr/include/x86_64-linux-gnu/qt5/QtXml",
+                "/usr/include/x86_64-linux-gnu/qt5/QtConcurrent",
+                "/usr/include/x86_64-linux-gnu/qt5/QtDBus",
+                "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++"
+            ],
+            "defines": [
+                "Q_OS_LINUX",
+                "QT_CORE_LIB",
+                "QT_GUI_LIB",
+                "QT_WIDGETS_LIB"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
