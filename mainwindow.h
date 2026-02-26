@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStackedWidget>
 #include "eventtablewidget.h"
 #include "trajectoryview.h"
 
@@ -30,15 +31,18 @@ private slots:
     void onPrintEventView();
     void onPrintTrajectoryView();
 
+private slots:
+    void onEventRowClicked(int row);
+
 private:
     Ui::MainWindow *ui;
     EventTableWidget *eventView;
     TrajectoryView *trajectoryView;
-    QWidget *currentView;
+    QStackedWidget *viewStack;
     
-    void showEventView();
-    void showTrajectoryView();
-    void hideEventView();
-    void hideTrajectoryView();
+    void setupViewStack();
+    void switchToParameterView();
+    void switchToEventView();
+    void switchToTrajectoryView();
 };
 #endif // MAINWINDOW_H

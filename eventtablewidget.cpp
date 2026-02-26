@@ -12,6 +12,11 @@ EventTableWidget::EventTableWidget(QWidget *parent)
     setupTable();
     layout->addWidget(eventTable);
     
+    // Connect row click signal
+    connect(eventTable, &QTableWidget::cellClicked, this, [this](int row, int) {
+        emit rowClicked(row);
+    });
+    
     setLayout(layout);
 }
 

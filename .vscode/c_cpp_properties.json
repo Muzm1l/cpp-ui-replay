@@ -4,20 +4,21 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/build/Desktop_Qt_5_15_13-Debug",
-                "/usr/include/x86_64-linux-gnu/qt5",
-                "/usr/include/x86_64-linux-gnu/qt5/QtCore",
-                "/usr/include/x86_64-linux-gnu/qt5/QtGui",
-                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
-                "/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
-                "/usr/include/x86_64-linux-gnu/qt5/QtOpenGL",
-                "/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport",
-                "/usr/include/x86_64-linux-gnu/qt5/QtSql",
-                "/usr/include/x86_64-linux-gnu/qt5/QtTest",
-                "/usr/include/x86_64-linux-gnu/qt5/QtXml",
-                "/usr/include/x86_64-linux-gnu/qt5/QtConcurrent",
-                "/usr/include/x86_64-linux-gnu/qt5/QtDBus",
-                "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++"
+                "${workspaceFolder}/build",
+                "${workspaceFolder}/build/Desktop_Qt_6_10_1-Debug",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtNetwork",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtOpenGL",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtPrintSupport",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtSql",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtTest",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtXml",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtConcurrent",
+                "/home/siddartha/Qt/6.10.1/gcc_64/include/QtDBus",
+                "/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++"
             ],
             "defines": [
                 "Q_OS_LINUX",
@@ -25,10 +26,11 @@
                 "QT_GUI_LIB",
                 "QT_WIDGETS_LIB"
             ],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-clang-x64",
+            "compileCommands": "${workspaceFolder}/build/Desktop_Qt_6_10_1-Debug/.qtc_clangd/compile_commands.json"
         }
     ],
     "version": 4

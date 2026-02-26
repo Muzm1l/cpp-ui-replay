@@ -20,7 +20,8 @@ HEADERS += \
     trajectoryview.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    trajectoryview.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

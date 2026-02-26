@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build (make) Qt Desktop_Qt_6_10_1-Debug",
+			"type": "shell",
+			"command": "make",
+			"args": [
+				"-C",
+				"build/Desktop_Qt_6_10_1-Debug"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

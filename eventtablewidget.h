@@ -20,6 +20,9 @@ public:
     void clearEvents();
     QTableWidget* getTableWidget() { return eventTable; }
 
+signals:
+    void rowClicked(int row);
+
 private:
     QTableWidget *eventTable;
     QVBoxLayout *layout;

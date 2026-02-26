@@ -2,10 +2,14 @@
 #define TRAJECTORYVIEW_H
 
 #include <QWidget>
-#include <QListWidget>
-#include <QTableWidget>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QGraphicsLineItem>
+#include <QGraphicsTextItem>
+
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class TrajectoryView;
+}
+QT_END_NAMESPACE
 
 class TrajectoryView : public QWidget
 {
@@ -16,12 +20,20 @@ public:
     ~TrajectoryView();
 
 private:
-    QListWidget *tubeList;
-    QWidget *trajectoryPlot;
-    QTableWidget *trajectoryTable;
+    Ui::TrajectoryView *ui;
+    double zoomLevel = 1.0;
+    QGraphicsScene *trajectoryScene = nullptr;
     
-    void setupUI();
+    // Axes items to keep fixed
+    QList<QGraphicsLineItem*> axisLines;
+    QList<QGraphicsTextItem*> axisLabels;
+    
+    void initTrajectoryPlot();
     void populateDummyData();
+    void updateAxesPosition();
+    
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 
 #endif // TRAJECTORYVIEW_H

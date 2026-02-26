@@ -12,22 +12,19 @@
 #include <QAction>
 #include <QStackedWidget>
 #include <QLabel>
+#include <QScreen>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , eventView(nullptr)
-    , currentView(nullptr)
+    , trajectoryView(nullptr)
+    , viewStack(nullptr)
 {
     ui->setupUi(this);
     
-    // Create the event view (initially hidden)
-    eventView = new EventTableWidget(this);
-    eventView->hide();
-    
-    // Create the trajectory view (initially hidden)
-    trajectoryView = new TrajectoryView(this);
-    trajectoryView->hide();
+    // Setup view stack for content switching
+    setupViewStack();
     
     // Add some sample events for demonstration
     eventView->addEvent("Sensor1", "10:30:45.123", "10:30:50.456", "10:31:00.789", "CONTACT", "Target Detected");
@@ -49,37 +46,48 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionPrintEventView, &QAction::triggered, this, &MainWindow::onPrintEventView);
     connect(ui->actionPrintTrajectoryView, &QAction::triggered, this, &MainWindow::onPrintTrajectoryView);
     
-    // Set size constraints
-    setMinimumSize(1200, 800);   // Minimum window size
-    setMaximumSize(2560, 1440);  // Maximum window size
+    // Connect event table row click to trajectory view
+    connect(eventView, &EventTableWidget::rowClicked, this, &MainWindow::onEventRowClicked);
     
-    // Maximize window to fit screen
-    showMaximized();
-    
-    // Set vertical stretch factors for the right side to make bottom view half the height
-    // Find the right vertical layout
-    QHBoxLayout* mainLayout = qobject_cast<QHBoxLayout*>(ui->centralwidget->layout());
-    if (mainLayout && mainLayout->count() >= 2) {
-        QLayoutItem* rightItem = mainLayout->itemAt(1);
-        if (rightItem) {
-            QVBoxLayout* rightLayout = qobject_cast<QVBoxLayout*>(rightItem->layout());
-            if (rightLayout && rightLayout->count() >= 2) {
-                qDebug() << "Setting stretch factors for right side - layout found with" << rightLayout->count() << "items";
-                rightLayout->setStretch(0, 1);  // Top layout gets stretch factor 1
-                rightLayout->setStretch(1, 1);  // Bottom columnView_3 gets stretch factor 1 (equal = half each)
-                qDebug() << "Stretch factor for item 0:" << rightLayout->stretch(0);
-                qDebug() << "Stretch factor for item 1:" << rightLayout->stretch(1);
-            }
-        }
-    } else {
-        qDebug() << "Main layout structure not as expected";
+    // Set standard window size, but clamp to the available screen size
+    const QSize standardSize(1200, 1600);
+    QSize targetSize = standardSize;
+    if (QScreen *screen = QGuiApplication::primaryScreen()) {
+        const QSize availableSize = screen->availableGeometry().size();
+        targetSize = standardSize.boundedTo(availableSize);
+        setMaximumSize(availableSize);
     }
+    setMinimumSize(QSize(0, 0));
+    resize(targetSize);
     
     // Configure left table - resize columns to fit content
-    ui->tableWidget_left->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    ui->tableWidget_left->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->tableWidget_left->setAlternatingRowColors(true);
+    ui->GeoInfoTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->GeoInfoTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->GeoInfoTable->setAlternatingRowColors(true);
+    
+    // Show parameter view by default
+    switchToParameterView();
+}
 
+void MainWindow::setupViewStack()
+{
+    // Create the stacked widget to hold the different views
+    viewStack = new QStackedWidget(this);
+    
+    // The parameter view is the original UI created by ui->setupUi(this)
+    // Add it directly to the stacked widget
+    viewStack->addWidget(ui->centralwidget);    // Index 0: Parameter view
+    
+    // Create and add event view
+    eventView = new EventTableWidget(this);
+    viewStack->addWidget(eventView);            // Index 1: Event view
+    
+    // Create and add trajectory view
+    trajectoryView = new TrajectoryView(this);
+    viewStack->addWidget(trajectoryView);       // Index 2: Trajectory view
+    
+    // Set the stacked widget as the central widget
+    setCentralWidget(viewStack);
 }
 
 MainWindow::~MainWindow()
@@ -116,13 +124,7 @@ void MainWindow::onFileExit()
 void MainWindow::onViewParameter()
 {
     qDebug() << "Switching to Parameter view";
-    hideEventView();
-    hideTrajectoryView();
-    // Show other views - they should be visible by default
-    ui->columnView_2->show();
-    ui->columnView->show();
-    ui->columnView_3->show();
-    ui->tableWidget_left->show();
+    switchToParameterView();
     QMessageBox::information(this, tr("View Changed"), 
         tr("Switched to Parameter view."));
 }
@@ -130,14 +132,13 @@ void MainWindow::onViewParameter()
 void MainWindow::onViewEvent()
 {
     qDebug() << "Switching to Event view";
-    showEventView();
+    switchToEventView();
 }
 
 void MainWindow::onViewTrajectory()
 {
     qDebug() << "Switching to Trajectory view";
-    hideEventView();
-    showTrajectoryView();
+    switchToTrajectoryView();
 }
 
 void MainWindow::onPrintParameterView()
@@ -161,167 +162,33 @@ void MainWindow::onPrintTrajectoryView()
         tr("Trajectory View sent to printer."));
 }
 
-void MainWindow::showEventView()
+void MainWindow::switchToParameterView()
 {
-    // Hide all other views
-    ui->tableWidget_left->hide();
-    ui->columnView_2->hide();
-    ui->columnView->hide();
-    ui->columnView_3->hide();
-    
-    // Get the main layout
-    QHBoxLayout* mainLayout = qobject_cast<QHBoxLayout*>(ui->centralwidget->layout());
-    if (mainLayout) {
-        // Clear the main layout
-        while (mainLayout->count() > 0) {
-            mainLayout->removeItem(mainLayout->itemAt(0));
-        }
-        
-        // Add event view to fill the entire central widget
-        mainLayout->addWidget(eventView, 1);
-        eventView->show();
-        qDebug() << "Event view shown in full screen";
+    if (viewStack) {
+        viewStack->setCurrentIndex(0);
+        qDebug() << "Switched to Parameter view (index 0)";
     }
 }
 
-void MainWindow::hideEventView()
+void MainWindow::switchToEventView()
 {
-    // Remove event view from layout
-    QHBoxLayout* mainLayout = qobject_cast<QHBoxLayout*>(ui->centralwidget->layout());
-    if (mainLayout) {
-        // Clear the main layout
-        while (mainLayout->count() > 0) {
-            mainLayout->removeItem(mainLayout->itemAt(0));
-        }
-        
-        // Create left layout
-        QVBoxLayout* leftLayout = new QVBoxLayout();
-        leftLayout->setContentsMargins(0, 0, 0, 0);
-        leftLayout->setSpacing(0);
-        
-        // Add header label
-        QLabel* headerLabel = new QLabel("Geographical Information");
-        headerLabel->setMinimumSize(0, 30);
-        headerLabel->setMaximumSize(400, 30);
-        headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; font-weight: bold; padding-left: 5px;");
-        leftLayout->addWidget(headerLabel);
-        
-        // Add left table
-        leftLayout->addWidget(ui->tableWidget_left);
-        
-        // Add spacers
-        leftLayout->addSpacing(40);
-        leftLayout->addSpacing(40);
-        leftLayout->addSpacing(40);
-        
-        // Create right layout
-        QVBoxLayout* rightLayout = new QVBoxLayout();
-        rightLayout->setSpacing(5);
-        
-        QHBoxLayout* topLayout = new QHBoxLayout();
-        topLayout->setSpacing(5);
-        topLayout->addWidget(ui->columnView_2);
-        topLayout->addWidget(ui->columnView, 1);
-        
-        rightLayout->addLayout(topLayout);
-        rightLayout->addWidget(ui->columnView_3, 1);
-        rightLayout->setStretch(0, 1);
-        rightLayout->setStretch(1, 1);
-        
-        // Add layouts to main layout
-        mainLayout->addLayout(leftLayout);
-        mainLayout->addLayout(rightLayout, 1);
-        
-        // Show the views
-        ui->tableWidget_left->show();
-        ui->columnView_2->show();
-        ui->columnView->show();
-        ui->columnView_3->show();
-        
-        eventView->hide();
-        qDebug() << "Event view hidden, restored original layout";
+    if (viewStack) {
+        viewStack->setCurrentIndex(1);
+        qDebug() << "Switched to Event view (index 1)";
     }
 }
 
-void MainWindow::showTrajectoryView()
+void MainWindow::switchToTrajectoryView()
 {
-    // Hide all other views
-    ui->tableWidget_left->hide();
-    ui->columnView_2->hide();
-    ui->columnView->hide();
-    ui->columnView_3->hide();
-    
-    // Get the main layout
-    QHBoxLayout* mainLayout = qobject_cast<QHBoxLayout*>(ui->centralwidget->layout());
-    if (mainLayout) {
-        // Clear the main layout
-        while (mainLayout->count() > 0) {
-            mainLayout->removeItem(mainLayout->itemAt(0));
-        }
-        
-        // Add trajectory view to fill the entire central widget
-        mainLayout->addWidget(trajectoryView, 1);
-        trajectoryView->show();
-        qDebug() << "Trajectory view shown in full screen";
+    if (viewStack) {
+        viewStack->setCurrentIndex(2);
+        qDebug() << "Switched to Trajectory view (index 2)";
     }
 }
 
-void MainWindow::hideTrajectoryView()
+void MainWindow::onEventRowClicked(int row)
 {
-    // Remove trajectory view from layout
-    QHBoxLayout* mainLayout = qobject_cast<QHBoxLayout*>(ui->centralwidget->layout());
-    if (mainLayout) {
-        // Clear the main layout
-        while (mainLayout->count() > 0) {
-            mainLayout->removeItem(mainLayout->itemAt(0));
-        }
-        
-        // Create left layout
-        QVBoxLayout* leftLayout = new QVBoxLayout();
-        leftLayout->setContentsMargins(0, 0, 0, 0);
-        leftLayout->setSpacing(0);
-        
-        // Add header label
-        QLabel* headerLabel = new QLabel("Geographical Information");
-        headerLabel->setMinimumSize(0, 30);
-        headerLabel->setMaximumSize(400, 30);
-        headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; font-weight: bold; padding-left: 5px;");
-        leftLayout->addWidget(headerLabel);
-        
-        // Add left table
-        leftLayout->addWidget(ui->tableWidget_left);
-        
-        // Add spacers
-        leftLayout->addSpacing(40);
-        leftLayout->addSpacing(40);
-        leftLayout->addSpacing(40);
-        
-        // Create right layout
-        QVBoxLayout* rightLayout = new QVBoxLayout();
-        rightLayout->setSpacing(5);
-        
-        QHBoxLayout* topLayout = new QHBoxLayout();
-        topLayout->setSpacing(5);
-        topLayout->addWidget(ui->columnView_2);
-        topLayout->addWidget(ui->columnView, 1);
-        
-        rightLayout->addLayout(topLayout);
-        rightLayout->addWidget(ui->columnView_3, 1);
-        rightLayout->setStretch(0, 1);
-        rightLayout->setStretch(1, 1);
-        
-        // Add layouts to main layout
-        mainLayout->addLayout(leftLayout);
-        mainLayout->addLayout(rightLayout, 1);
-        
-        // Show the views
-        ui->tableWidget_left->show();
-        ui->columnView_2->show();
-        ui->columnView->show();
-        ui->columnView_3->show();
-        
-        trajectoryView->hide();
-        qDebug() << "Trajectory view hidden, restored original layout";
-    }
+    qDebug() << "Event row clicked:" << row;
+    qDebug() << "Switching to Trajectory view";
+    switchToTrajectoryView();
 }
-
