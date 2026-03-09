@@ -4,12 +4,12 @@
 #include <QWidget>
 #include <QGraphicsLineItem>
 #include <QGraphicsTextItem>
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class TrajectoryView;
-}
-QT_END_NAMESPACE
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QLabel>
+#include <QTableWidget>
+#include <QPushButton>
+#include <QColumnView>
 
 class TrajectoryView : public QWidget
 {
@@ -20,7 +20,21 @@ public:
     ~TrajectoryView();
 
 private:
-    Ui::TrajectoryView *ui;
+    // Main layout widgets
+    QGraphicsView *trajectoryPlot;
+    QColumnView *tubeSelect;
+    QColumnView *tablePlot;
+    
+    // Left side widgets
+    QLabel *acousticLabel;
+    QGraphicsView *acousticGraphWidget;
+    QLabel *demonLabel;
+    QGraphicsView *demonGraphWidget;
+    QLabel *geoHeaderLabel;
+    QTableWidget *geoTable;
+    QPushButton *replayButton;
+    
+    // Graphics scene
     double zoomLevel = 1.0;
     QGraphicsScene *trajectoryScene = nullptr;
     
@@ -28,6 +42,7 @@ private:
     QList<QGraphicsLineItem*> axisLines;
     QList<QGraphicsTextItem*> axisLabels;
     
+    void setupUI();
     void initTrajectoryPlot();
     void populateDummyData();
     void updateAxesPosition();

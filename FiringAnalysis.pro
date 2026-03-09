@@ -11,17 +11,31 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    datparser.cpp \
     eventtablewidget.cpp \
     trajectoryview.cpp
 
 HEADERS += \
+    datpacket.h \
+    datparser.h \
+    parser_format_config.h \
     mainwindow.h \
     eventtablewidget.h \
     trajectoryview.h
 
-FORMS += \
-    mainwindow.ui \
-    trajectoryview.ui
+# Show non-GUI parser/analyzer/decoder files in Qt Creator project tree
+DISTFILES += \
+    README.md \
+    Makefile.datparser \
+    datparser.cpp \
+    datparser.h \
+    datparser_main.cpp \
+    dat_analyzer.cpp \
+    dat_analyzer.py \
+    packet_decoder.cpp \
+    packet_decoder.py
+
+OTHER_FILES += $$DISTFILES
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
