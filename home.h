@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef HOME_H
+#define HOME_H
 
 #include <QMainWindow>
 #include <QStackedWidget>
@@ -11,16 +11,21 @@
 #include <QMenu>
 #include <QAction>
 #include <QStatusBar>
-#include "eventtablewidget.h"
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include "eventview.h"
+#include "parametrview.h"
 #include "trajectoryview.h"
+#include "geographicalinfo.h"
+#include "parserdialog.h"
 
-class MainWindow : public QMainWindow
+class Home : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    Home(QWidget *parent = nullptr);
+    ~Home();
 
 private slots:
     void onFileOpen();
@@ -61,25 +66,29 @@ private:
     // Status bar
     QStatusBar *statusBar;
     
-    // Parameter view widgets
-    QLabel *geoInfoLabel;
-    QTableWidget *geoInfoTable;
-    QColumnView *tubeSelect;
-    QColumnView *trajectoryPlot;
-    QColumnView *tablePlot;
-    
     // Views
-    EventTableWidget *eventView;
+    ParametrView *parameterView;
+    EventView *eventView;
     TrajectoryView *trajectoryView;
+    
+    // Home page widgets (similar to TrajectoryView but without acoustic/demon)
+    QWidget *homeWidget;
+    QGraphicsView *trajectoryPlot;
+    QColumnView *tubeSelect;
+    QColumnView *tablePlot;
+    GeographicalInfo *geoInfo;
+    QGraphicsScene *trajectoryScene;
     
     QString currentDatFilePath;
     
     void setupUI();
     void setupMenuBar();
     void setupViewStack();
-    void showParserDialog(const QString& initialFilePath = QString(), bool autoStart = false);
+    void setupHomeWidget();
+    void initTrajectoryPlot();
+    void populateDummyData();
     void switchToParameterView();
     void switchToEventView();
     void switchToTrajectoryView();
 };
-#endif // MAINWINDOW_H
+#endif // HOME_H

@@ -1,7 +1,7 @@
-#include "eventtablewidget.h"
+#include "eventview.h"
 #include <QHeaderView>
 
-EventTableWidget::EventTableWidget(QWidget *parent)
+EventView::EventView(QWidget *parent)
     : QWidget(parent), eventTable(nullptr), layout(nullptr)
 {
     layout = new QVBoxLayout(this);
@@ -20,11 +20,11 @@ EventTableWidget::EventTableWidget(QWidget *parent)
     setLayout(layout);
 }
 
-EventTableWidget::~EventTableWidget()
+EventView::~EventView()
 {
 }
 
-void EventTableWidget::setupTable()
+void EventView::setupTable()
 {
     // Set column count and headers
     eventTable->setColumnCount(6);
@@ -90,7 +90,7 @@ void EventTableWidget::setupTable()
     eventTable->setMinimumSize(400, 300);
 }
 
-void EventTableWidget::addEvent(const QString &sender, const QString &systemTime,
+void EventView::addEvent(const QString &sender, const QString &systemTime,
                                const QString &engagementTime, const QString &torpedoTime,
                                const QString &msgType, const QString &msgLabel)
 {
@@ -106,7 +106,7 @@ void EventTableWidget::addEvent(const QString &sender, const QString &systemTime
     eventTable->setItem(row, 5, new QTableWidgetItem(msgLabel));
 }
 
-void EventTableWidget::clearEvents()
+void EventView::clearEvents()
 {
     eventTable->setRowCount(0);
 }

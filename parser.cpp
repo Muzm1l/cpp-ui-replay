@@ -1,9 +1,10 @@
-#include "datparser.h"
+#include "parser.h"
 #include "parser_format_config.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -104,6 +105,9 @@ bool DatParser::parseFile(const std::string& filepath) {
     std::cout << "Parsed " << packets.size() << " packets from " << lineNum << " lines" << std::endl;
     if (!badLineLogs.empty()) {
         std::cout << "Bad lines: " << badLineLogs.size() << std::endl;
+        for (size_t i = 0; i < std::min(size_t(5), badLineLogs.size()); ++i) {
+            std::cout << "  " << badLineLogs[i] << std::endl;
+        }
     }
     return true;
 }
@@ -151,7 +155,7 @@ bool DatParser::parsePacketLine(const std::string& line, int lineNum) {
     DatPacket packet;
     packet.timestamp = timestamp;
     packet.source = allBytes[0];
-    packet.type = allBytes[20];
+    packet.type = allBytes[1];
     packet.payload.assign(allBytes.begin() + static_cast<long>(ParserFormat::HEADER_HEX_BYTES), allBytes.end());
 
     packets.push_back(packet);
@@ -312,9 +316,9 @@ bool DatParser::readAsciiZ(const std::vector<uint8_t>& data, size_t& offset, siz
 
 MessageFamily DatParser::classifyPacket(const DatPacket& packet) {
     switch (packet.type) {
-        case 0x07:
+        case 0x00:
             return MessageFamily::Own;
-        case 0x0d:
+        case 0x01:
             if (targetType0dSource == -1 || packet.source == static_cast<uint8_t>(targetType0dSource)) {
                 targetType0dSource = packet.source;
                 return MessageFamily::Target;
@@ -327,13 +331,13 @@ MessageFamily DatParser::classifyPacket(const DatPacket& packet) {
                 tubeType0dSource = packet.source;
             }
             return MessageFamily::Tube;
-        case 0x0e:
-        case 0x0f:
-        case 0x10:
-        case 0x11:
+        case 0x03:
+            return MessageFamily::Torpedo;
+        case 0x04:
+        case 0x05:
             return MessageFamily::Event;
-        case 0x26:
-        case 0x27:
+        case 0x02:
+        case 0x06:
             return MessageFamily::Sonar;
         default:
             return MessageFamily::Unknown;
@@ -384,23 +388,44 @@ void DatParser::decodeOwnTrajectory(const DatPacket& packet) {
         return;
     }
 
-    OwnRecord record;
-    size_t offset = ParserFormat::OWN_START_OFFSET;
-    readF32(payload, offset, record.time);
-    readF32(payload, offset, record.course);
-    readF32(payload, offset, record.speed);
-    readF32(payload, offset, record.depth);
-    readF32(payload, offset, record.x);
-    readF32(payload, offset, record.y);
+    const std::array<size_t, 7> candidateOffsets = {
+        ParserFormat::OWN_START_OFFSET, 0u, 2u, 4u, 8u, 12u, 16u
+    };
 
-    if (!isFiniteFloat(record.time) || !isFiniteFloat(record.course) || !isFiniteFloat(record.speed) || !isFiniteFloat(record.depth)) {
-        ++droppedRowCount;
-        return;
+    OwnRecord record;
+    bool decoded = false;
+    for (size_t candidateOffset : candidateOffsets) {
+        if (candidateOffset + ParserFormat::OWN_FIELD_COUNT * ParserFormat::F32_SIZE > payload.size()) {
+            continue;
+        }
+
+        OwnRecord candidate;
+        size_t offset = candidateOffset;
+        if (!readF32(payload, offset, candidate.time) ||
+            !readF32(payload, offset, candidate.course) ||
+            !readF32(payload, offset, candidate.speed) ||
+            !readF32(payload, offset, candidate.depth) ||
+            !readF32(payload, offset, candidate.x) ||
+            !readF32(payload, offset, candidate.y)) {
+            continue;
+        }
+
+        if (!isFiniteFloat(candidate.time) || !isFiniteFloat(candidate.course) || !isFiniteFloat(candidate.speed) || !isFiniteFloat(candidate.depth)) {
+            continue;
+        }
+
+        if (!isWithinRange(candidate.course, ParserFormat::COURSE_MIN, ParserFormat::COURSE_MAX) ||
+            !isWithinRange(candidate.speed, ParserFormat::SPEED_MIN, ParserFormat::SPEED_MAX) ||
+            !isWithinRange(candidate.depth, ParserFormat::DEPTH_MIN, ParserFormat::DEPTH_MAX)) {
+            continue;
+        }
+
+        record = candidate;
+        decoded = true;
+        break;
     }
 
-    if (!isWithinRange(record.course, ParserFormat::COURSE_MIN, ParserFormat::COURSE_MAX) ||
-        !isWithinRange(record.speed, ParserFormat::SPEED_MIN, ParserFormat::SPEED_MAX) ||
-        !isWithinRange(record.depth, ParserFormat::DEPTH_MIN, ParserFormat::DEPTH_MAX)) {
+    if (!decoded) {
         ++droppedRowCount;
         return;
     }
@@ -563,24 +588,19 @@ void DatParser::decodeEvent(const DatPacket& packet) {
 
     EventRecord record;
     size_t offset = ParserFormat::EVENT_START_OFFSET;
-    readF32(payload, offset, record.time);
     readU32(payload, offset, record.sender);
-    readU32(payload, offset, record.type);
+    readF32(payload, offset, record.systemTime);
+    readF32(payload, offset, record.engagementTime);
+    readF32(payload, offset, record.torpedoTime);
 
-    if (offset < payload.size()) {
-        size_t textLen = payload.size() - offset;
-        record.name = bytesToAsciiZ(payload, offset, textLen);
-    }
-    if (record.name.empty()) {
-        record.name = "UNKNOWN";
-    }
-
-    if (!isFiniteFloat(record.time)) {
+    if (!isFiniteFloat(record.systemTime) || !isFiniteFloat(record.engagementTime) || !isFiniteFloat(record.torpedoTime)) {
         ++droppedRowCount;
         return;
     }
 
-    updateFieldMinMax("event.time", record.time);
+    updateFieldMinMax("event.systemTime", record.systemTime);
+    updateFieldMinMax("event.engagementTime", record.engagementTime);
+    updateFieldMinMax("event.torpedoTime", record.torpedoTime);
     eventRecords.push_back(record);
 }
 
@@ -723,10 +743,10 @@ bool DatParser::writeEventCsv(const std::string& filepath) {
 
     file << joinColumns(ParserFormat::EVENT_COLUMNS) << "\n";
     for (const auto& record : eventRecords) {
-        file << record.time << ","
-             << record.sender << ","
-             << record.type << ","
-             << record.name << "\n";
+        file << record.sender << ","
+             << record.systemTime << ","
+             << record.engagementTime << ","
+             << record.torpedoTime << "\n";
     }
     return true;
 }
@@ -839,7 +859,7 @@ bool DatParser::validateDecodedData() {
     std::vector<float> eventTimes;
     eventTimes.reserve(eventRecords.size());
     for (const auto& row : eventRecords) {
-        eventTimes.push_back(row.time);
+        eventTimes.push_back(row.systemTime);
     }
 
     std::vector<float> sonarTimes;
@@ -891,4 +911,225 @@ void DatParser::printStatistics() {
 
 std::string DatParser::getTimestampForOutput(const std::string& datTimestamp) {
     return datTimestamp;
+}
+
+// Helper structures and functions for parsing
+
+struct PacketInfo {
+    uint8_t type;
+    uint8_t source;
+    size_t payloadSize;
+};
+
+struct Sample {
+    std::string timestamp;
+    std::vector<uint8_t> payload;
+};
+
+static bool hexToBytesRaw(const std::string& hexData, std::vector<uint8_t>& outBytes) {
+    outBytes.clear();
+    if ((hexData.size() % 2) != 0) {
+        return false;
+    }
+
+    outBytes.reserve(hexData.size() / 2);
+    for (size_t index = 0; index + 1 < hexData.size(); index += 2) {
+        auto nibble = [](char c) -> uint8_t {
+            if (c >= '0' && c <= '9') return static_cast<uint8_t>(c - '0');
+            if (c >= 'a' && c <= 'f') return static_cast<uint8_t>(c - 'a' + 10);
+            if (c >= 'A' && c <= 'F') return static_cast<uint8_t>(c - 'A' + 10);
+            return 0;
+        };
+
+        char left = hexData[index];
+        char right = hexData[index + 1];
+        if (!std::isxdigit(static_cast<unsigned char>(left)) || !std::isxdigit(static_cast<unsigned char>(right))) {
+            outBytes.clear();
+            return false;
+        }
+
+        uint8_t value = static_cast<uint8_t>((nibble(left) << 4) | nibble(right));
+        outBytes.push_back(value);
+    }
+
+    return true;
+}
+
+bool analyzePackets(const std::string& filepath, int maxPackets) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open " << filepath << std::endl;
+        return false;
+    }
+
+    std::vector<PacketInfo> packets;
+    std::map<uint8_t, size_t> typeCount;
+    std::map<uint8_t, size_t> sourceCount;
+
+    std::string line;
+    int lineNumber = 0;
+    while (std::getline(file, line)) {
+        if (maxPackets > 0 && static_cast<int>(packets.size()) >= maxPackets) {
+            break;
+        }
+
+        ++lineNumber;
+        size_t commaPos = line.find(',');
+        if (commaPos == std::string::npos) {
+            continue;
+        }
+
+        std::string hexData = line.substr(commaPos + 1);
+        hexData.erase(std::remove_if(hexData.begin(), hexData.end(),
+                                     [](unsigned char c) { return std::isspace(c) != 0; }),
+                      hexData.end());
+
+        if (hexData.size() < ParserFormat::HEADER_HEX_CHARS) {
+            continue;
+        }
+
+        std::vector<uint8_t> bytes;
+        if (!hexToBytesRaw(hexData, bytes) || bytes.size() < ParserFormat::HEADER_HEX_BYTES) {
+            continue;
+        }
+
+        PacketInfo info{};
+        info.source = bytes[0];
+        info.type = bytes[20];
+        info.payloadSize = bytes.size() - ParserFormat::HEADER_HEX_BYTES;
+        packets.push_back(info);
+        typeCount[info.type]++;
+        sourceCount[info.source]++;
+    }
+
+    std::cout << "Analyzed " << packets.size() << " packets" << std::endl;
+    std::cout << "\nPacket types found:" << std::endl;
+    for (const auto& pair : typeCount) {
+        std::cout << "  Type 0x" << std::hex << std::setfill('0') << std::setw(2)
+                  << static_cast<int>(pair.first) << ": " << std::dec << pair.second << " packets" << std::endl;
+    }
+
+    std::cout << "\nPacket sources found:" << std::endl;
+    for (const auto& pair : sourceCount) {
+        std::cout << "  Source 0x" << std::hex << std::setfill('0') << std::setw(2)
+                  << static_cast<int>(pair.first) << ": " << std::dec << pair.second << " packets" << std::endl;
+    }
+
+    return true;
+}
+
+std::vector<Sample> readSamplePackets(const std::string& filepath, uint8_t packetType, int count) {
+    std::vector<Sample> samples;
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        return samples;
+    }
+
+    std::string line;
+    while (std::getline(file, line) && static_cast<int>(samples.size()) < count) {
+        size_t commaPos = line.find(',');
+        if (commaPos == std::string::npos) {
+            continue;
+        }
+
+        std::string timestamp = line.substr(0, commaPos);
+        std::string hexData = line.substr(commaPos + 1);
+        hexData.erase(std::remove_if(hexData.begin(), hexData.end(),
+                                     [](unsigned char c) { return std::isspace(c) != 0; }),
+                      hexData.end());
+
+        if (hexData.size() < ParserFormat::HEADER_HEX_CHARS) {
+            continue;
+        }
+
+        std::vector<uint8_t> bytes;
+        if (!hexToBytesRaw(hexData, bytes) || bytes.size() < ParserFormat::HEADER_HEX_BYTES) {
+            continue;
+        }
+
+        if (bytes[20] != packetType) {
+            continue;
+        }
+
+        Sample sample;
+        sample.timestamp = timestamp;
+        sample.payload.assign(bytes.begin() + static_cast<long>(ParserFormat::HEADER_HEX_BYTES), bytes.end());
+        samples.push_back(sample);
+    }
+
+    return samples;
+}
+
+// Binary format conversion function
+bool convertBinaryToText(const std::string& inputFile, const std::string& outputFile) {
+    // Read entire binary file
+    std::ifstream inFile(inputFile, std::ios::binary);
+    if (!inFile.is_open()) {
+        std::cerr << "Cannot open input file: " << inputFile << std::endl;
+        return false;
+    }
+
+    std::vector<uint8_t> fileData((std::istreambuf_iterator<char>(inFile)),
+                                   std::istreambuf_iterator<char>());
+    inFile.close();
+
+    std::ofstream outFile(outputFile);
+    if (!outFile.is_open()) {
+        std::cerr << "Cannot open output file: " << outputFile << std::endl;
+        return false;
+    }
+
+    auto looksLikeTimestamp = [](const std::vector<uint8_t>& data, size_t pos) -> bool {
+        if (pos + 3 >= data.size()) return false;
+        return (data[pos] >= '0' && data[pos] <= '9') &&
+               (data[pos+1] >= '0' && data[pos+1] <= '9') &&
+               (data[pos+2] == '_');
+    };
+
+    size_t pos = 0;
+    int lineNum = 0;
+
+    while (pos < fileData.size()) {
+        uint8_t len = fileData[pos++];
+        
+        if (len == 0 || len > 100 || pos + len > fileData.size()) {
+            std::cerr << "Invalid length " << static_cast<int>(len) << " at position " << pos-1 << std::endl;
+            break;
+        }
+
+        std::string timestamp(fileData.begin() + pos, fileData.begin() + pos + len);
+        pos += len;
+
+        std::vector<uint8_t> packetData;
+        while (pos < fileData.size()) {
+            if (pos + 1 < fileData.size()) {
+                uint8_t possibleLen = fileData[pos];
+                if (possibleLen >= 20 && possibleLen <= 30 && 
+                    pos + 1 + possibleLen <= fileData.size() &&
+                    looksLikeTimestamp(fileData, pos + 1)) {
+                    break;
+                }
+            }
+            
+            packetData.push_back(fileData[pos++]);
+            
+            if (packetData.size() > 500) {
+                std::cerr << "Warning: packet too large at line " << lineNum << std::endl;
+                break;
+            }
+        }
+
+        if (!packetData.empty()) {
+            outFile << timestamp << ",";
+            for (uint8_t byte : packetData) {
+                outFile << std::hex << std::setw(2) << std::setfill('0') 
+                       << static_cast<unsigned int>(byte);
+            }
+            outFile << "\n";
+            lineNum++;
+        }
+    }
+
+    std::cout << "Converted " << lineNum << " records from " << inputFile << " to " << outputFile << std::endl;
+    return true;
 }

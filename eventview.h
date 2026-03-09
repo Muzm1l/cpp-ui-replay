@@ -1,17 +1,17 @@
-#ifndef EVENTTABLEWIDGET_H
-#define EVENTTABLEWIDGET_H
+#ifndef EVENTVIEW_H
+#define EVENTVIEW_H
 
 #include <QWidget>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
-class EventTableWidget : public QWidget
+class EventView : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit EventTableWidget(QWidget *parent = nullptr);
-    ~EventTableWidget();
+    explicit EventView(QWidget *parent = nullptr);
+    ~EventView();
     
     void addEvent(const QString &sender, const QString &systemTime,
                   const QString &engagementTime, const QString &torpedoTime,
@@ -30,4 +30,4 @@ private:
     void setupTable();
 };
 
-#endif // EVENTTABLEWIDGET_H
+#endif // EVENTVIEW_H

@@ -1,12 +1,100 @@
-#ifndef DATPARSER_H
-#define DATPARSER_H
+#ifndef PARSER_H
+#define PARSER_H
 
-#include "datpacket.h"
 #include <string>
 #include <vector>
 #include <map>
 #include <fstream>
 #include <memory>
+#include <cstdint>
+#include <cstddef>
+
+struct DatPacket {
+    std::string timestamp;
+    uint8_t source;
+    uint8_t type;
+    std::vector<uint8_t> payload;
+
+    DatPacket() : source(0), type(0) {}
+};
+
+struct OwnRecord {
+    float time;
+    float course;
+    float speed;
+    float depth;
+    float x;
+    float y;
+
+    OwnRecord() : time(0), course(0), speed(0), depth(0), x(0), y(0) {}
+};
+
+struct TargetRecord {
+    float time;
+    float bearing;
+    float range;
+    float course;
+    float speed;
+    float depth;
+    float f1, f2, f3, f4, f5, f6, f7, f8;
+    float x;
+    float y;
+
+    TargetRecord() : time(0), bearing(0), range(0), course(0), speed(0),
+                     depth(0), f1(0), f2(0), f3(0), f4(0), f5(0), f6(0),
+                     f7(0), f8(0), x(0), y(0) {}
+};
+
+struct TorpedoRecord {
+    float time;
+    float bearing;
+    float range;
+    float course;
+    float speed;
+    float depth;
+    float sonar;
+    float wake;
+    float x;
+    float y;
+
+    TorpedoRecord() : time(0), bearing(0), range(0), course(0), speed(0),
+                      depth(0), sonar(0), wake(0), x(0), y(0) {}
+};
+
+struct TubeRecord {
+    float time;
+    float bearing;
+    float range;
+    float course;
+    float speed;
+    float depth;
+    float sonar;
+    float wake;
+    float x;
+    float y;
+
+    TubeRecord() : time(0), bearing(0), range(0), course(0), speed(0),
+                   depth(0), sonar(0), wake(0), x(0), y(0) {}
+};
+
+struct EventRecord {
+    uint32_t sender;
+    float systemTime;
+    float engagementTime;
+    float torpedoTime;
+
+    EventRecord() : sender(0), systemTime(0), engagementTime(0), torpedoTime(0) {}
+};
+
+struct SonarRecord {
+    float time;
+    uint32_t weapon;
+    float beamX;
+    float beamY;
+    float intensity;
+
+    SonarRecord() : time(0), weapon(0), beamX(0), beamY(0), intensity(0) {}
+};
 
 enum class MessageFamily {
     Own,
@@ -103,4 +191,4 @@ private:
     std::string getTimestampForOutput(const std::string& datTimestamp);
 };
 
-#endif // DATPARSER_H
+#endif // PARSER_H

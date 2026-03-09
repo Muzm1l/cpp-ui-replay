@@ -1,0 +1,19 @@
+# Build directories
+build/
+
+# Object files
+*.o
+*.obj
+*.a
+*.so
+*.dll
+
+# Executables
+FiringAnalysis
+*.exe
+
+# IDE
+.vscode/
+.idea/
+*.pro.user
+*.pro.user.*

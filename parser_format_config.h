@@ -20,30 +20,30 @@ inline constexpr std::array<const char*, 10> TUBE_COLUMNS = {
 };
 
 inline constexpr std::array<const char*, 4> EVENT_COLUMNS = {
-    "time", "sender", "type", "name"
+    "sender", "systemTime", "engagementTime", "torpedoTime"
 };
 
 inline constexpr std::array<const char*, 5> SONAR_COLUMNS = {
     "time", "weapon", "beamX", "beamY", "intensity"
 };
 
-inline constexpr size_t HEADER_HEX_BYTES = 28;
+inline constexpr size_t HEADER_HEX_BYTES = 2;
 inline constexpr size_t HEADER_HEX_CHARS = HEADER_HEX_BYTES * 2;
 
-inline constexpr size_t OWN_START_OFFSET = 8;
+inline constexpr size_t OWN_START_OFFSET = 32;
 inline constexpr size_t OWN_FIELD_COUNT = 6;
-inline constexpr size_t TARGET_START_OFFSET = 0;
+inline constexpr size_t TARGET_START_OFFSET = 32;
 inline constexpr size_t TARGET_FIELD_COUNT = 16;
-inline constexpr size_t TUBE_START_OFFSET = 0;
+inline constexpr size_t TUBE_START_OFFSET = 32;
 inline constexpr size_t TUBE_FIELD_COUNT = 10;
 inline constexpr size_t EVENT_START_OFFSET = 0;
 inline constexpr size_t SONAR_START_OFFSET = 0;
 
 inline constexpr size_t F32_SIZE = 4;
-inline constexpr size_t OWN_MIN_BYTES = OWN_START_OFFSET + OWN_FIELD_COUNT * F32_SIZE;
-inline constexpr size_t TARGET_MIN_BYTES = TARGET_START_OFFSET + TARGET_FIELD_COUNT * F32_SIZE;
-inline constexpr size_t TUBE_MIN_BYTES = TUBE_START_OFFSET + TUBE_FIELD_COUNT * F32_SIZE;
-inline constexpr size_t EVENT_MIN_BYTES = 12;
+inline constexpr size_t OWN_MIN_BYTES = OWN_FIELD_COUNT * F32_SIZE;
+inline constexpr size_t TARGET_MIN_BYTES = 64;   // 16 floats need 64 bytes minimum
+inline constexpr size_t TUBE_MIN_BYTES = 40;    // 10 floats need 40 bytes minimum
+inline constexpr size_t EVENT_MIN_BYTES = 16;    // 1 uint32 + 3 floats need 16 bytes
 inline constexpr size_t SONAR_RECORD_BYTES = 20;
 
 inline constexpr float COURSE_MIN = 0.0f;

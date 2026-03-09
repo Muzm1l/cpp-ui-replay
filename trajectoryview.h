@@ -10,6 +10,9 @@
 #include <QTableWidget>
 #include <QPushButton>
 #include <QColumnView>
+#include "geographicalinfo.h"
+#include "acousticpanorama.h"
+#include "demongraph.h"
 
 class TrajectoryView : public QWidget
 {
@@ -26,12 +29,9 @@ private:
     QColumnView *tablePlot;
     
     // Left side widgets
-    QLabel *acousticLabel;
-    QGraphicsView *acousticGraphWidget;
-    QLabel *demonLabel;
-    QGraphicsView *demonGraphWidget;
-    QLabel *geoHeaderLabel;
-    QTableWidget *geoTable;
+    AcousticPanorama *acousticPanorama;
+    DemonGraph *demonGraph;
+    GeographicalInfo *geoInfo;
     QPushButton *replayButton;
     
     // Graphics scene
