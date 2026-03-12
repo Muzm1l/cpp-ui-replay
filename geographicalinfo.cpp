@@ -30,7 +30,7 @@ void GeographicalInfo::setupUI()
     headerLabel = new QLabel("Geographical Information");
     headerLabel->setMinimumHeight(30);
     headerLabel->setMaximumHeight(30);
-    headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; font-weight: bold; padding-left: 5px;");
+    headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; border: 1px solid whitesmoke; font-weight: bold; padding-left: 5px;");
     headerLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(headerLabel);
     
@@ -46,11 +46,10 @@ void GeographicalInfo::setupTable()
     geoTable->setStyleSheet(
         "QTableWidget { \n"
         "  gridline-color: rgba(255, 255, 255, 0);\n"
-        // "  border: 2px solid rgb(255, 255, 255);\n"
         "}\n"
         "QTableWidget::item {\n"
         "  padding: 5px;\n"
-        "  border: 1px solid gray;\n"
+        "  border: 1px solid whitesmoke;\n"
         "  background-color: rgb(50, 50, 50);\n"
         "  color: rgb(255, 255, 255);\n"
         "}"

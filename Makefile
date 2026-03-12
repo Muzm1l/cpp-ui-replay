@@ -486,8 +486,8 @@ build/moc/moc_home.cpp: home.h \
 		parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
-		trajectoryview.h \
 		geographicalinfo.h \
+		trajectoryview.h \
 		parserdialog.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -501,6 +501,7 @@ build/moc/moc_eventview.cpp: eventview.h \
 build/moc/moc_parametrview.cpp: parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
+		geographicalinfo.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include parametrview.h -o build/moc/moc_parametrview.cpp
@@ -549,8 +550,8 @@ build/obj/main.o: main.cpp home.h \
 		parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
-		trajectoryview.h \
 		geographicalinfo.h \
+		trajectoryview.h \
 		parserdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/main.o main.cpp
 
@@ -559,8 +560,8 @@ build/obj/home.o: home.cpp home.h \
 		parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
-		trajectoryview.h \
 		geographicalinfo.h \
+		trajectoryview.h \
 		parserdialog.h \
 		parser.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/home.o home.cpp
@@ -578,7 +579,8 @@ build/obj/eventview.o: eventview.cpp eventview.h
 
 build/obj/parametrview.o: parametrview.cpp parametrview.h \
 		acousticpanorama.h \
-		demongraph.h
+		demongraph.h \
+		geographicalinfo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/parametrview.o parametrview.cpp
 
 build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \

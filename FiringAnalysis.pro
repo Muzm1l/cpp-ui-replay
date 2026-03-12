@@ -24,7 +24,8 @@ SOURCES += \
     trajectoryview.cpp \
     geographicalinfo.cpp \
     acousticpanorama.cpp \
-    demongraph.cpp
+    demongraph.cpp \
+    trajectorytable.cpp
 
 HEADERS += \
     parser.h \
@@ -36,7 +37,8 @@ HEADERS += \
     trajectoryview.h \
     geographicalinfo.h \
     acousticpanorama.h \
-    demongraph.h
+    demongraph.h \
+    trajectorytable.h
 
 # Show non-GUI parser/analyzer/decoder files in Qt Creator project tree
 DISTFILES += \

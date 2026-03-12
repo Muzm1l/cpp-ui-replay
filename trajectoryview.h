@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QColumnView>
 #include "geographicalinfo.h"
+#include "trajectorytable.h"
 #include "acousticpanorama.h"
 #include "demongraph.h"
 
@@ -26,7 +27,7 @@ private:
     // Main layout widgets
     QGraphicsView *trajectoryPlot;
     QColumnView *tubeSelect;
-    QColumnView *tablePlot;
+    TrajectoryTable *tablePlot;
     
     // Left side widgets
     AcousticPanorama *acousticPanorama;

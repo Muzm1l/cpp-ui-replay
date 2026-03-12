@@ -12,6 +12,7 @@
 #include <QSizePolicy>
 #include "acousticpanorama.h"
 #include "demongraph.h"
+#include "geographicalinfo.h"
 
 class ParametrView : public QWidget
 {
@@ -28,7 +29,8 @@ private:
     QVBoxLayout *rightLayout;
     AcousticPanorama *acousticPanorama;
     DemonGraph *demonGraph;
-    
+    GeographicalInfo *geographicalInfo;
+
     // Right layout widgets
     QSlider *sliderAT;
     QSlider *sliderAD;

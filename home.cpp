@@ -34,7 +34,8 @@ Home::Home(QWidget *parent)
 {
     // Setup the window
     setWindowTitle("Home");
-    
+    // Set the main window background color to black
+    this->setStyleSheet("background-color: black;");
     // Create main UI
     setupUI();
     
@@ -90,6 +91,9 @@ void Home::setupUI()
 void Home::setupMenuBar()
 {
     menuBar = new QMenuBar(this);
+
+    menuBar->setStyleSheet("QMenuBar { background-color: gray; color: white;  } QMenuBar::item { background-color: gray; color: white; } QMenuBar::item:selected { background-color: #a0a0a0; color: white; }");
+    menuBar->setFixedHeight(32);
     setMenuBar(menuBar);
     
     // File Menu
@@ -300,14 +304,14 @@ void Home::setupHomeWidget()
     
     tubeSelect = new QColumnView();
     tubeSelect->setMaximumWidth(150);
-    tubeSelect->setStyleSheet("border: 1px solid gray;");
+    tubeSelect->setStyleSheet("border: 1px solid whitesmoke;");
     tubeSelectLayout->addWidget(tubeSelect);
     
     topRightLayout->addLayout(tubeSelectLayout);
     
     // Trajectory Plot
     trajectoryPlot = new QGraphicsView();
-    trajectoryPlot->setStyleSheet("background-color: none ; border: 1px solid gray;");
+    trajectoryPlot->setStyleSheet("background-color: none ; border: 1px solid whitesmoke;");
     trajectoryPlot->setFrameShape(QFrame::Box);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
     topRightLayout->addWidget(trajectoryPlot);
@@ -317,7 +321,7 @@ void Home::setupHomeWidget()
     // Table Plot
     tablePlot = new QColumnView();
     tablePlot->setFrameShadow(QFrame::Sunken);
-    tablePlot->setStyleSheet("border: 1px solid gray;");
+    tablePlot->setStyleSheet("border: 1px solid whitesmoke;");
     rightLayout->addWidget(tablePlot, 1);
     
     // Add to main layout

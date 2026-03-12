@@ -2,6 +2,7 @@
 #include "geographicalinfo.h"
 #include "acousticpanorama.h"
 #include "demongraph.h"
+#include "trajectorytable.h"
 #include <QHeaderView>
 #include <QTableWidgetItem>
 #include <QGraphicsScene>
@@ -97,7 +98,7 @@ void TrajectoryView::setupUI()
         "  background-color: rgb(85, 87, 83);\n"
         "  color: white;\n"
         "  font-weight: bold;\n"
-        "  border: 1px solid gray;\n"
+        "  border: 1px solid whitesmoke;\n"
         "}\n"
         "QPushButton:hover {\n"
         "  background-color: rgb(100, 100, 100);\n"
@@ -110,14 +111,14 @@ void TrajectoryView::setupUI()
     
     tubeSelect = new QColumnView();
     tubeSelect->setMaximumWidth(200);
-    tubeSelect->setStyleSheet("border: 1px solid gray;");
+    tubeSelect->setStyleSheet("border: 1px solid whitesmoke;");
     tubeSelectLayout->addWidget(tubeSelect);
     
     topRightLayout->addLayout(tubeSelectLayout);
     
     // Trajectory Plot
     trajectoryPlot = new QGraphicsView();
-    trajectoryPlot->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid gray;");
+    trajectoryPlot->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
     trajectoryPlot->setFrameShape(QFrame::NoFrame);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
     topRightLayout->addWidget(trajectoryPlot);
@@ -125,13 +126,21 @@ void TrajectoryView::setupUI()
     rightLayout->addLayout(topRightLayout, 1);
     
     // Table Plot
-    tablePlot = new QColumnView();
+    
+    tablePlot = new TrajectoryTable();
     tablePlot->setFrameShadow(QFrame::Sunken);
-    tablePlot->setStyleSheet("border: 1px solid gray;");
-    rightLayout->addWidget(tablePlot, 1);
+    tablePlot->setStyleSheet("border: 1px solid whitesmoke;");
+    // Add a container widget for tablePlot to provide margin
+    QWidget *tablePlotContainer = new QWidget();
+    QVBoxLayout *tablePlotContainerLayout = new QVBoxLayout(tablePlotContainer);
+    tablePlotContainerLayout->setContentsMargins(10, 10, 10, 10); // Add space around the table
+    tablePlotContainerLayout->addWidget(tablePlot, 0, Qt::AlignTop);
+    tablePlotContainer->setStyleSheet("border: 1px solid Whitesmoke;");
+    rightLayout->addWidget(tablePlotContainer, 1);
     
     // Add to main layout
     mainLayout->addWidget(leftPanel);
+
     mainLayout->addWidget(rightPanel, 1);
 }
 
