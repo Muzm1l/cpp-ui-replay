@@ -49,7 +49,7 @@ void EventView::setupTable()
         "}\n"
         "QTableWidget::item {\n"
         "  padding: 5px;\n"
-        "  border: 1px solid gray;\n"
+        "  border: 0.5px solid gray;\n"
         "  background-color: rgb(100, 100, 100);\n"
         "  color: rgb(255, 255, 255);\n"
         "}\n"

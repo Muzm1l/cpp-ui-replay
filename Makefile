@@ -61,13 +61,17 @@ SOURCES       = main.cpp \
 		trajectoryview.cpp \
 		geographicalinfo.cpp \
 		acousticpanorama.cpp \
-		demongraph.cpp build/moc/moc_home.cpp \
+		demongraph.cpp \
+		trajectorytable.cpp \
+		parameterinfotree.cpp build/moc/moc_home.cpp \
 		build/moc/moc_eventview.cpp \
 		build/moc/moc_parametrview.cpp \
 		build/moc/moc_trajectoryview.cpp \
 		build/moc/moc_geographicalinfo.cpp \
 		build/moc/moc_acousticpanorama.cpp \
-		build/moc/moc_demongraph.cpp
+		build/moc/moc_demongraph.cpp \
+		build/moc/moc_parameterinfotree.cpp \
+		build/moc/moc_trajectorytable.cpp
 OBJECTS       = build/obj/main.o \
 		build/obj/home.o \
 		build/obj/parser.o \
@@ -78,13 +82,17 @@ OBJECTS       = build/obj/main.o \
 		build/obj/geographicalinfo.o \
 		build/obj/acousticpanorama.o \
 		build/obj/demongraph.o \
+		build/obj/trajectorytable.o \
+		build/obj/parameterinfotree.o \
 		build/obj/moc_home.o \
 		build/obj/moc_eventview.o \
 		build/obj/moc_parametrview.o \
 		build/obj/moc_trajectoryview.o \
 		build/obj/moc_geographicalinfo.o \
 		build/obj/moc_acousticpanorama.o \
-		build/obj/moc_demongraph.o
+		build/obj/moc_demongraph.o \
+		build/obj/moc_parameterinfotree.o \
+		build/obj/moc_trajectorytable.o
 DIST          = README.md \
 		parser.cpp \
 		parser.h \
@@ -200,7 +208,9 @@ DIST          = README.md \
 		trajectoryview.h \
 		geographicalinfo.h \
 		acousticpanorama.h \
-		demongraph.h main.cpp \
+		demongraph.h \
+		parameterinfotree.h \
+		trajectorytable.h main.cpp \
 		home.cpp \
 		parser.cpp \
 		parserdialog.cpp \
@@ -209,7 +219,9 @@ DIST          = README.md \
 		trajectoryview.cpp \
 		geographicalinfo.cpp \
 		acousticpanorama.cpp \
-		demongraph.cpp
+		demongraph.cpp \
+		trajectorytable.cpp \
+		parameterinfotree.cpp
 QMAKE_TARGET  = FiringAnalysis
 DESTDIR       = 
 TARGET        = FiringAnalysis
@@ -445,8 +457,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -478,16 +490,18 @@ compiler_moc_predefs_clean:
 build/moc/moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -O2 -std=gnu++1z -Wall -Wextra -dM -E -o build/moc/moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp
+compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp
+	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp
 build/moc/moc_home.cpp: home.h \
 		eventview.h \
 		parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
+		parameterinfotree.h \
 		trajectoryview.h \
+		trajectorytable.h \
 		parserdialog.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -502,12 +516,14 @@ build/moc/moc_parametrview.cpp: parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
+		parameterinfotree.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include parametrview.h -o build/moc/moc_parametrview.cpp
 
 build/moc/moc_trajectoryview.cpp: trajectoryview.h \
 		geographicalinfo.h \
+		trajectorytable.h \
 		acousticpanorama.h \
 		demongraph.h \
 		build/moc/moc_predefs.h \
@@ -528,6 +544,16 @@ build/moc/moc_demongraph.cpp: demongraph.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include demongraph.h -o build/moc/moc_demongraph.cpp
+
+build/moc/moc_parameterinfotree.cpp: parameterinfotree.h \
+		build/moc/moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include parameterinfotree.h -o build/moc/moc_parameterinfotree.cpp
+
+build/moc/moc_trajectorytable.cpp: trajectorytable.h \
+		build/moc/moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectorytable.h -o build/moc/moc_trajectorytable.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -551,7 +577,9 @@ build/obj/main.o: main.cpp home.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
+		parameterinfotree.h \
 		trajectoryview.h \
+		trajectorytable.h \
 		parserdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/main.o main.cpp
 
@@ -561,7 +589,9 @@ build/obj/home.o: home.cpp home.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
+		parameterinfotree.h \
 		trajectoryview.h \
+		trajectorytable.h \
 		parserdialog.h \
 		parser.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/home.o home.cpp
@@ -580,11 +610,13 @@ build/obj/eventview.o: eventview.cpp eventview.h
 build/obj/parametrview.o: parametrview.cpp parametrview.h \
 		acousticpanorama.h \
 		demongraph.h \
-		geographicalinfo.h
+		geographicalinfo.h \
+		parameterinfotree.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/parametrview.o parametrview.cpp
 
 build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		geographicalinfo.h \
+		trajectorytable.h \
 		acousticpanorama.h \
 		demongraph.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/trajectoryview.o trajectoryview.cpp
@@ -597,6 +629,12 @@ build/obj/acousticpanorama.o: acousticpanorama.cpp acousticpanorama.h
 
 build/obj/demongraph.o: demongraph.cpp demongraph.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/demongraph.o demongraph.cpp
+
+build/obj/trajectorytable.o: trajectorytable.cpp trajectorytable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/trajectorytable.o trajectorytable.cpp
+
+build/obj/parameterinfotree.o: parameterinfotree.cpp parameterinfotree.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/parameterinfotree.o parameterinfotree.cpp
 
 build/obj/moc_home.o: build/moc/moc_home.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_home.o build/moc/moc_home.cpp
@@ -618,6 +656,12 @@ build/obj/moc_acousticpanorama.o: build/moc/moc_acousticpanorama.cpp
 
 build/obj/moc_demongraph.o: build/moc/moc_demongraph.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_demongraph.o build/moc/moc_demongraph.cpp
+
+build/obj/moc_parameterinfotree.o: build/moc/moc_parameterinfotree.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_parameterinfotree.o build/moc/moc_parameterinfotree.cpp
+
+build/obj/moc_trajectorytable.o: build/moc/moc_trajectorytable.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_trajectorytable.o build/moc/moc_trajectorytable.cpp
 
 ####### Install
 

@@ -111,14 +111,14 @@ void TrajectoryView::setupUI()
     
     tubeSelect = new QColumnView();
     tubeSelect->setMaximumWidth(200);
-    tubeSelect->setStyleSheet("border: 1px solid whitesmoke;");
+    tubeSelect->setStyleSheet("border: 0.5px solid whitesmoke;");
     tubeSelectLayout->addWidget(tubeSelect);
     
     topRightLayout->addLayout(tubeSelectLayout);
     
     // Trajectory Plot
     trajectoryPlot = new QGraphicsView();
-    trajectoryPlot->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    trajectoryPlot->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     trajectoryPlot->setFrameShape(QFrame::NoFrame);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
     topRightLayout->addWidget(trajectoryPlot);
@@ -129,13 +129,13 @@ void TrajectoryView::setupUI()
     
     tablePlot = new TrajectoryTable();
     tablePlot->setFrameShadow(QFrame::Sunken);
-    tablePlot->setStyleSheet("border: 1px solid whitesmoke;");
+    tablePlot->setStyleSheet("border: 0.5px solid whitesmoke;");
     // Add a container widget for tablePlot to provide margin
     QWidget *tablePlotContainer = new QWidget();
     QVBoxLayout *tablePlotContainerLayout = new QVBoxLayout(tablePlotContainer);
     tablePlotContainerLayout->setContentsMargins(10, 10, 10, 10); // Add space around the table
     tablePlotContainerLayout->addWidget(tablePlot, 0, Qt::AlignTop);
-    tablePlotContainer->setStyleSheet("border: 1px solid Whitesmoke;");
+    tablePlotContainer->setStyleSheet("border: 0.5px solid Whitesmoke;");
     rightLayout->addWidget(tablePlotContainer, 1);
     
     // Add to main layout

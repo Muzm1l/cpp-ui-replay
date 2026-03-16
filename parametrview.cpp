@@ -29,8 +29,11 @@ ParametrView::ParametrView(QWidget *parent)
     geographicalInfo = new GeographicalInfo();
     leftColumnLayout->addWidget(geographicalInfo);
 
-    // Vertical spacer
-    leftColumnLayout->addStretch();
+    // Parameter Info Tree (box tree view)
+    parameterInfoTree = new ParameterInfoTree();
+    leftColumnLayout->addWidget(parameterInfoTree);
+    // // Vertical spacer
+    // leftColumnLayout->addStretch();
     
     // Right panel
     QWidget *rightPanel = new QWidget();
@@ -78,7 +81,7 @@ void ParametrView::setupRightLayout()
     // Left part with 4 sliders (AT, AD, AY, AX)
     QWidget *topLeftWidget = new QWidget();
     topLeftWidget->setFixedWidth(400);
-    topLeftWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    topLeftWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     QHBoxLayout *topLeftLayout = new QHBoxLayout(topLeftWidget);
     topLeftLayout->setContentsMargins(10, 10, 10, 10);
     topLeftLayout->setSpacing(20);
@@ -128,13 +131,13 @@ void ParametrView::setupRightLayout()
     
     // Right part with graphics view
     QWidget *topRightWidget = new QWidget();
-    topRightWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    topRightWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     QVBoxLayout *topRightLayout = new QVBoxLayout(topRightWidget);
     topRightLayout->setContentsMargins(0, 0, 0, 0);
     
     topRightScene = new QGraphicsScene(this);
     topRightGraphicsView = new QGraphicsView(topRightScene, this);
-    topRightGraphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    topRightGraphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     topRightGraphicsView->setFrameShape(QFrame::NoFrame);
     topRightLayout->addWidget(topRightGraphicsView);
     
@@ -144,7 +147,7 @@ void ParametrView::setupRightLayout()
     
     // Middle section with SRT slider
     QWidget *srtWidget = new QWidget();
-    srtWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    srtWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     srtWidget->setMinimumHeight(80);
     srtWidget->setMaximumHeight(80);
     srtWidget->setFixedWidth(1100); // Set fixed width for middle section
@@ -164,7 +167,7 @@ void ParametrView::setupRightLayout()
     // Bottom section with graphics view
     rightScene = new QGraphicsScene(this);
     rightGraphicsView = new QGraphicsView(rightScene, this);
-    rightGraphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    rightGraphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     rightGraphicsView->setMinimumHeight(300);
     rightLayout->addWidget(rightGraphicsView, 2);
 }

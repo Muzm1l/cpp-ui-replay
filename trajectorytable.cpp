@@ -13,13 +13,14 @@ TrajectoryTable::TrajectoryTable(QWidget *parent)
     closeButton->raise();
     connect(closeButton, &QPushButton::clicked, this, [this]() { emit closeRequested(); this->hide(); });
     setShowGrid(true);
-    setStyleSheet("QTableWidget { border: 1px solid #444; gridline-color: #444; } QHeaderView::section { border: 1px solid #444; } QTableWidget::item { border-right: 1px solid #444; }");
+    setGridStyle(Qt::SolidLine);
+    setStyleSheet("QTableWidget { border: 0.5px solid #fffefe; gridline-color: #fffefe; padding: 0px; margin: 0px; } QHeaderView::section { border: 0.5px solid #fffefe; padding: 0px; margin: 0px; } QTableWidget::item { border-right: 0.5px solid #fffefe; border-left: 0.5px solid #fffefe; padding-top: 2px; padding-bottom: -8px; margin: 0px; }");
         int rowHeight = 34;
     for (int row = 0; row < 6; ++row) {
         setRowHeight(row, rowHeight); // Header row height for all
     }
         setFixedHeight(horizontalHeader()->height() + 6 * rowHeight + 2); // Table height fits 6 rows plus header
-        setStyleSheet("QTableWidget { border: 1px solid #fffefe; gridline-color: #ffffff; padding: 0px; margin: 0px; } QHeaderView::section { border: 1px solid #ffffff; padding: 0px; margin: 0px; } QTableWidget::item { border-right: 1px solid #fffdfd; padding-top: 2px; padding-bottom: -8px; margin: 0px; }");
+        setStyleSheet("QTableWidget { border: 0.5px solid #fffefe; gridline-color: #ffffff; padding: 0px; margin: 0px; } QHeaderView::section { border: 0.5px solid #ffffff; padding: 0px; margin: 0px; } QTableWidget::item { border-right: 0.5px solid #fffdfd; padding-top: 2px; padding-bottom: -8px; margin: 0px; }");
     verticalHeader()->setVisible(false);
 
     // Set up table properties, columns, etc.

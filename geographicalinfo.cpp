@@ -49,7 +49,7 @@ void GeographicalInfo::setupTable()
         "}\n"
         "QTableWidget::item {\n"
         "  padding: 5px;\n"
-        "  border: 1px solid whitesmoke;\n"
+        "  border: 0.5px solid whitesmoke;\n"
         "  background-color: rgb(50, 50, 50);\n"
         "  color: rgb(255, 255, 255);\n"
         "}"

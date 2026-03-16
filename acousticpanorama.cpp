@@ -26,13 +26,13 @@ void AcousticPanorama::setupUI()
     headerLabel = new QLabel("Acoustic Panorama");
     headerLabel->setMinimumHeight(30);
     headerLabel->setMaximumHeight(30);
-    headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; font-weight: bold; padding-left: 5px; border: 1px solid whitesmoke;");
+    headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; font-weight: bold; padding-left: 5px; border: 0.5px solid whitesmoke;");
     headerLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(headerLabel);
     
     // Graphics View for displaying graphs
     graphicsView = new QGraphicsView(this);
-    graphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 1px solid whitesmoke;");
+    graphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     graphicsView->setRenderHint(QPainter::Antialiasing);
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

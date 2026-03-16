@@ -13,6 +13,7 @@
 #include "acousticpanorama.h"
 #include "demongraph.h"
 #include "geographicalinfo.h"
+#include "parameterinfotree.h"
 
 class ParametrView : public QWidget
 {
@@ -30,6 +31,7 @@ private:
     AcousticPanorama *acousticPanorama;
     DemonGraph *demonGraph;
     GeographicalInfo *geographicalInfo;
+    ParameterInfoTree *parameterInfoTree;
 
     // Right layout widgets
     QSlider *sliderAT;
