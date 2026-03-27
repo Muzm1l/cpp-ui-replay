@@ -191,4 +191,8 @@ private:
     std::string getTimestampForOutput(const std::string& datTimestamp);
 };
 
+// Converts a binary .dat file into a text file with "timestamp,hexdata" lines
+// that can be parsed by DatParser::parseFile.
+bool convertBinaryToText(const std::string& inputFile, const std::string& outputFile);
+
 #endif // PARSER_H

@@ -63,7 +63,8 @@ SOURCES       = main.cpp \
 		acousticpanorama.cpp \
 		demongraph.cpp \
 		trajectorytable.cpp \
-		parameterinfotree.cpp build/moc/moc_home.cpp \
+		parameterinfotree.cpp \
+		replyscreen.cpp build/moc/moc_home.cpp \
 		build/moc/moc_eventview.cpp \
 		build/moc/moc_parametrview.cpp \
 		build/moc/moc_trajectoryview.cpp \
@@ -71,7 +72,8 @@ SOURCES       = main.cpp \
 		build/moc/moc_acousticpanorama.cpp \
 		build/moc/moc_demongraph.cpp \
 		build/moc/moc_parameterinfotree.cpp \
-		build/moc/moc_trajectorytable.cpp
+		build/moc/moc_trajectorytable.cpp \
+		build/moc/moc_replyscreen.cpp
 OBJECTS       = build/obj/main.o \
 		build/obj/home.o \
 		build/obj/parser.o \
@@ -84,6 +86,7 @@ OBJECTS       = build/obj/main.o \
 		build/obj/demongraph.o \
 		build/obj/trajectorytable.o \
 		build/obj/parameterinfotree.o \
+		build/obj/replyscreen.o \
 		build/obj/moc_home.o \
 		build/obj/moc_eventview.o \
 		build/obj/moc_parametrview.o \
@@ -92,7 +95,8 @@ OBJECTS       = build/obj/main.o \
 		build/obj/moc_acousticpanorama.o \
 		build/obj/moc_demongraph.o \
 		build/obj/moc_parameterinfotree.o \
-		build/obj/moc_trajectorytable.o
+		build/obj/moc_trajectorytable.o \
+		build/obj/moc_replyscreen.o
 DIST          = README.md \
 		parser.cpp \
 		parser.h \
@@ -210,7 +214,8 @@ DIST          = README.md \
 		acousticpanorama.h \
 		demongraph.h \
 		parameterinfotree.h \
-		trajectorytable.h main.cpp \
+		trajectorytable.h \
+		replyscreen.h main.cpp \
 		home.cpp \
 		parser.cpp \
 		parserdialog.cpp \
@@ -221,7 +226,8 @@ DIST          = README.md \
 		acousticpanorama.cpp \
 		demongraph.cpp \
 		trajectorytable.cpp \
-		parameterinfotree.cpp
+		parameterinfotree.cpp \
+		replyscreen.cpp
 QMAKE_TARGET  = FiringAnalysis
 DESTDIR       = 
 TARGET        = FiringAnalysis
@@ -457,8 +463,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h replyscreen.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp replyscreen.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -490,9 +496,9 @@ compiler_moc_predefs_clean:
 build/moc/moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -O2 -std=gnu++1z -Wall -Wextra -dM -E -o build/moc/moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp
+compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replyscreen.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp
+	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replyscreen.cpp
 build/moc/moc_home.cpp: home.h \
 		eventview.h \
 		parametrview.h \
@@ -502,6 +508,7 @@ build/moc/moc_home.cpp: home.h \
 		parameterinfotree.h \
 		trajectoryview.h \
 		trajectorytable.h \
+		replyscreen.h \
 		parserdialog.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -526,6 +533,7 @@ build/moc/moc_trajectoryview.cpp: trajectoryview.h \
 		trajectorytable.h \
 		acousticpanorama.h \
 		demongraph.h \
+		replyscreen.h \
 		build/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectoryview.h -o build/moc/moc_trajectoryview.cpp
@@ -555,6 +563,11 @@ build/moc/moc_trajectorytable.cpp: trajectorytable.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectorytable.h -o build/moc/moc_trajectorytable.cpp
 
+build/moc/moc_replyscreen.cpp: replyscreen.h \
+		build/moc/moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include replyscreen.h -o build/moc/moc_replyscreen.cpp
+
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
@@ -580,6 +593,7 @@ build/obj/main.o: main.cpp home.h \
 		parameterinfotree.h \
 		trajectoryview.h \
 		trajectorytable.h \
+		replyscreen.h \
 		parserdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/main.o main.cpp
 
@@ -592,6 +606,7 @@ build/obj/home.o: home.cpp home.h \
 		parameterinfotree.h \
 		trajectoryview.h \
 		trajectorytable.h \
+		replyscreen.h \
 		parserdialog.h \
 		parser.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/home.o home.cpp
@@ -618,7 +633,8 @@ build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		geographicalinfo.h \
 		trajectorytable.h \
 		acousticpanorama.h \
-		demongraph.h
+		demongraph.h \
+		replyscreen.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/trajectoryview.o trajectoryview.cpp
 
 build/obj/geographicalinfo.o: geographicalinfo.cpp geographicalinfo.h
@@ -635,6 +651,9 @@ build/obj/trajectorytable.o: trajectorytable.cpp trajectorytable.h
 
 build/obj/parameterinfotree.o: parameterinfotree.cpp parameterinfotree.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/parameterinfotree.o parameterinfotree.cpp
+
+build/obj/replyscreen.o: replyscreen.cpp replyscreen.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/replyscreen.o replyscreen.cpp
 
 build/obj/moc_home.o: build/moc/moc_home.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_home.o build/moc/moc_home.cpp
@@ -662,6 +681,9 @@ build/obj/moc_parameterinfotree.o: build/moc/moc_parameterinfotree.cpp
 
 build/obj/moc_trajectorytable.o: build/moc/moc_trajectorytable.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_trajectorytable.o build/moc/moc_trajectorytable.cpp
+
+build/obj/moc_replyscreen.o: build/moc/moc_replyscreen.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_replyscreen.o build/moc/moc_replyscreen.cpp
 
 ####### Install
 

@@ -1,10 +1,13 @@
 #include "trajectorytable.h"
 #include <QHeaderView>
+#include <QSizePolicy>
 
 TrajectoryTable::TrajectoryTable(QWidget *parent)
         
     : QTableWidget(parent)
 {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     // Add close button
     closeButton = new QPushButton("✕", this);
     closeButton->setFixedSize(24, 24);
@@ -12,21 +15,42 @@ TrajectoryTable::TrajectoryTable(QWidget *parent)
     closeButton->move(0, 0);
     closeButton->raise();
     connect(closeButton, &QPushButton::clicked, this, [this]() { emit closeRequested(); this->hide(); });
-    setShowGrid(true);
-    setGridStyle(Qt::SolidLine);
-    setStyleSheet("QTableWidget { border: 0.5px solid #fffefe; gridline-color: #fffefe; padding: 0px; margin: 0px; } QHeaderView::section { border: 0.5px solid #fffefe; padding: 0px; margin: 0px; } QTableWidget::item { border-right: 0.5px solid #fffefe; border-left: 0.5px solid #fffefe; padding-top: 2px; padding-bottom: -8px; margin: 0px; }");
-        int rowHeight = 34;
+    // We want only vertical separators (no horizontal grid lines).
+    // Disable the built-in grid and draw separators via stylesheet.
+    setShowGrid(false);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setSelectionMode(QAbstractItemView::NoSelection);
+    setFocusPolicy(Qt::NoFocus);
+    setStyleSheet(
+        "QTableWidget { border: 1px solid #ffffff; background: #5a5a5a; color: white; }\n"
+        "QHeaderView::section {"
+        "  border-right: 1px solid #ffffff;"
+        "  border-bottom: 1px solid #ffffff;"
+        "  padding: 6px 8px;"
+        "  background: #2b7fb8;"
+        "  color: white;"
+        "}\n"
+        "QTableWidget::item {"
+        "  border-right: 1px solid #ffffff;"
+        "  border-bottom: 0px;"
+        "  padding: 6px 8px;"
+        "  color: white;"
+        "  background: #5a5a5a;"
+        "}\n"
+    );
+
+    int rowHeight = 34;
     for (int row = 0; row < 6; ++row) {
         setRowHeight(row, rowHeight); // Header row height for all
     }
-        setFixedHeight(horizontalHeader()->height() + 6 * rowHeight + 2); // Table height fits 6 rows plus header
-        setStyleSheet("QTableWidget { border: 0.5px solid #fffefe; gridline-color: #ffffff; padding: 0px; margin: 0px; } QHeaderView::section { border: 0.5px solid #ffffff; padding: 0px; margin: 0px; } QTableWidget::item { border-right: 0.5px solid #fffdfd; padding-top: 2px; padding-bottom: -8px; margin: 0px; }");
     verticalHeader()->setVisible(false);
 
     // Set up table properties, columns, etc.
     setColumnCount(4);
     setRowCount(6);
     setHorizontalHeaderLabels({"Date", "Ownship", "Target", "Torpedo"});
+    horizontalHeader()->setStretchLastSection(true);
+    horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     setItem(0, 0, new QTableWidgetItem("Date"));
     setItem(1, 0, new QTableWidgetItem("Time"));
     setItem(0, 1, new QTableWidgetItem("Heading"));
@@ -42,11 +66,6 @@ TrajectoryTable::TrajectoryTable(QWidget *parent)
     setItem(4, 3, new QTableWidgetItem("WG Type"));
     setItem(5, 3, new QTableWidgetItem("Torpedo Phase"));
 
-    // Set column widths to visually match the example
-    setColumnWidth(0, 120);   // Date
-    setColumnWidth(1, 220);  // Ownship
-    setColumnWidth(2, 220);  // Target
-    setColumnWidth(3, 260);  // Torpedo
     for (int col = 0; col < columnCount(); ++col) {
         if (item(0, col)) item(0, col)->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         if (item(0, col)) item(0, col)->setFlags(item(0, col)->flags() & ~Qt::ItemIsEditable);

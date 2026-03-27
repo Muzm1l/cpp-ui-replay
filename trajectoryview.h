@@ -14,6 +14,7 @@
 #include "trajectorytable.h"
 #include "acousticpanorama.h"
 #include "demongraph.h"
+#include "replyscreen.h"
 
 class TrajectoryView : public QWidget
 {
@@ -22,6 +23,9 @@ class TrajectoryView : public QWidget
 public:
     explicit TrajectoryView(QWidget *parent = nullptr);
     ~TrajectoryView();
+
+private slots:
+    void on_replyButton_clicked();
 
 private:
     // Main layout widgets
@@ -33,7 +37,7 @@ private:
     AcousticPanorama *acousticPanorama;
     DemonGraph *demonGraph;
     GeographicalInfo *geoInfo;
-    QPushButton *replayButton;
+    QPushButton *replyButton;
     
     // Graphics scene
     double zoomLevel = 1.0;

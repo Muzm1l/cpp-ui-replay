@@ -29,7 +29,7 @@ TrajectoryView::TrajectoryView(QWidget *parent)
     , acousticPanorama(nullptr)
     , demonGraph(nullptr)
     , geoInfo(nullptr)
-    , replayButton(nullptr)
+    , replyButton(nullptr)
     , trajectoryScene(nullptr)
 {
     setupUI();
@@ -90,37 +90,39 @@ void TrajectoryView::setupUI()
     QVBoxLayout *tubeSelectLayout = new QVBoxLayout();
     tubeSelectLayout->setSpacing(5);
     
-    replayButton = new QPushButton("Replay");
-    replayButton->setMinimumHeight(30);
-    replayButton->setMaximumWidth(200);
-    replayButton->setStyleSheet(
+    replyButton = new QPushButton("Reply");
+    replyButton->setMinimumHeight(30);
+    replyButton->setMaximumWidth(200);
+    replyButton->setStyleSheet(
         "QPushButton {\n"
-        "  background-color: rgb(85, 87, 83);\n"
+        "  background-color: rgb(45, 45, 45);\n"
         "  color: white;\n"
         "  font-weight: bold;\n"
-        "  border: 1px solid whitesmoke;\n"
+        "  border: 1px solid darkgrey;\n"
         "}\n"
         "QPushButton:hover {\n"
-        "  background-color: rgb(100, 100, 100);\n"
+        "  background-color: rgb(60, 60, 60);\n"
         "}\n"
         "QPushButton:pressed {\n"
-        "  background-color: rgb(70, 70, 70);\n"
+        "  background-color: rgb(30, 30, 30);\n"
         "}"
     );
-    tubeSelectLayout->addWidget(replayButton);
+    tubeSelectLayout->addWidget(replyButton);
     
     tubeSelect = new QColumnView();
     tubeSelect->setMaximumWidth(200);
-    tubeSelect->setStyleSheet("border: 0.5px solid whitesmoke;");
+    tubeSelect->setStyleSheet("border: 0.5px solid darkgrey;");
     tubeSelectLayout->addWidget(tubeSelect);
     
     topRightLayout->addLayout(tubeSelectLayout);
     
     // Trajectory Plot
     trajectoryPlot = new QGraphicsView();
-    trajectoryPlot->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
+    trajectoryPlot->setStyleSheet("background-color: rgb(0, 0, 0); border: 0.5px solid darkgrey;");
     trajectoryPlot->setFrameShape(QFrame::NoFrame);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
+    trajectoryPlot->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    trajectoryPlot->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     topRightLayout->addWidget(trajectoryPlot);
     
     rightLayout->addLayout(topRightLayout, 1);
@@ -129,19 +131,26 @@ void TrajectoryView::setupUI()
     
     tablePlot = new TrajectoryTable();
     tablePlot->setFrameShadow(QFrame::Sunken);
-    tablePlot->setStyleSheet("border: 0.5px solid whitesmoke;");
     // Add a container widget for tablePlot to provide margin
     QWidget *tablePlotContainer = new QWidget();
     QVBoxLayout *tablePlotContainerLayout = new QVBoxLayout(tablePlotContainer);
     tablePlotContainerLayout->setContentsMargins(10, 10, 10, 10); // Add space around the table
     tablePlotContainerLayout->addWidget(tablePlot, 0, Qt::AlignTop);
-    tablePlotContainer->setStyleSheet("border: 0.5px solid Whitesmoke;");
+    tablePlotContainer->setStyleSheet("border: 0.5px solid darkgrey;");
     rightLayout->addWidget(tablePlotContainer, 1);
     
     // Add to main layout
     mainLayout->addWidget(leftPanel);
 
     mainLayout->addWidget(rightPanel, 1);
+
+    connect(replyButton, &QPushButton::clicked, this, &TrajectoryView::on_replyButton_clicked);
+}
+
+void TrajectoryView::on_replyButton_clicked()
+{
+    ReplyScreen *replyScreen = new ReplyScreen();
+    replyScreen->show();
 }
 
 void TrajectoryView::populateDummyData()
@@ -156,7 +165,7 @@ void TrajectoryView::initTrajectoryPlot()
     // Create graphics scene with extra margins for axes
     trajectoryScene = new QGraphicsScene(this);
     trajectoryScene->setSceneRect(0, 0, 1050, 850);
-    trajectoryScene->setBackgroundBrush(QBrush(QColor(50, 50, 50)));
+    trajectoryScene->setBackgroundBrush(QBrush(QColor(0, 0, 0)));
     
     // Define colors
     QColor darkBlue(0, 51, 102);      // Torpedo track
@@ -170,7 +179,12 @@ void TrajectoryView::initTrajectoryPlot()
     trajectoryPlot->setScene(trajectoryScene);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
     trajectoryPlot->setRenderHint(QPainter::SmoothPixmapTransform);
-    trajectoryPlot->fitInView(0, 0, 1050, 850, Qt::KeepAspectRatio);
+    trajectoryPlot->setDragMode(QGraphicsView::ScrollHandDrag);
+    if (trajectoryPlot->dragMode() == QGraphicsView::ScrollHandDrag) {
+        trajectoryPlot->setCursor(Qt::OpenHandCursor);
+    } else {
+        trajectoryPlot->setCursor(Qt::ArrowCursor);
+    }
 }
 
 bool TrajectoryView::eventFilter(QObject *obj, QEvent *event)

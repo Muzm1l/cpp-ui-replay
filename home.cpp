@@ -16,6 +16,7 @@
 #include <QStackedWidget>
 #include <QGraphicsScene>
 #include <QBrush>
+#include <QFileInfo>
 
 Home::Home(QWidget *parent)
     : QMainWindow(parent)
@@ -92,7 +93,17 @@ void Home::setupMenuBar()
 {
     menuBar = new QMenuBar(this);
 
-    menuBar->setStyleSheet("QMenuBar { background-color: gray; color: white;  } QMenuBar::item { background-color: gray; color: white; } QMenuBar::item:selected { background-color: #a0a0a0; color: white; }");
+    // Style both the menubar and the dropdown popup menus so the items
+    // remain readable on dark window backgrounds.
+    menuBar->setStyleSheet(
+        "QMenuBar { background-color: #5a5a5a; color: white; }\n"
+        "QMenuBar::item { background-color: transparent; color: white; padding: 6px 10px; }\n"
+        "QMenuBar::item:selected { background-color: #7a7a7a; }\n"
+        "QMenu { background-color: #2b2b2b; color: white; border: 1px solid #707070; }\n"
+        "QMenu::item { padding: 6px 28px 6px 22px; background-color: transparent; }\n"
+        "QMenu::item:selected { background-color: #3d6ea6; }\n"
+        "QMenu::separator { height: 1px; background: #707070; margin: 6px 8px; }\n"
+    );
     menuBar->setFixedHeight(32);
     setMenuBar(menuBar);
     
@@ -169,13 +180,33 @@ void Home::onFileOpen()
     if (!fileName.isEmpty()) {
         qDebug() << "Opening file:" << fileName;
 
+        QString fileToParse = fileName;
+
+        // If the selected file is a binary .dat, convert it to a
+        // text representation that DatParser can consume.
+        QFileInfo info(fileName);
+        if (info.suffix().compare("dat", Qt::CaseInsensitive) == 0) {
+            const QString textPath =
+                info.absolutePath() + "/" + info.completeBaseName() + "_parsed.txt";
+
+            if (!convertBinaryToText(fileName.toStdString(), textPath.toStdString())) {
+                QMessageBox::critical(this, tr("Parser"),
+                                      tr("Failed to convert binary .dat file."));
+                return;
+            }
+
+            qDebug() << "Converted binary .dat to text:" << textPath;
+            fileToParse = textPath;
+        }
+
         DatParser parser;
-        if (!parser.parseFile(fileName.toStdString())) {
-            QMessageBox::critical(this, tr("Parser"), tr("Failed to parse selected file."));
+        if (!parser.parseFile(fileToParse.toStdString())) {
+            QMessageBox::critical(this, tr("Parser"),
+                                  tr("Failed to parse selected file."));
             return;
         }
 
-        currentDatFilePath = fileName;
+        currentDatFilePath = fileToParse;
     }
 }
 
