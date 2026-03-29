@@ -5,6 +5,7 @@
 #include "parametrview.h"
 #include "trajectoryview.h"
 #include "geographicalinfo.h"
+#include "simulator.h"
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -54,6 +55,7 @@ Home::Home(QWidget *parent)
     // Connect menu actions
     connect(actionFileOpen, &QAction::triggered, this, &Home::onFileOpen);
     connect(actionFileClose, &QAction::triggered, this, &Home::onFileClose);
+    connect(actionGenerateSimulator, &QAction::triggered, this, &Home::onGenerateSimulator);
     connect(actionFileParser, &QAction::triggered, this, &Home::onFileParser);
     connect(actionFileExit, &QAction::triggered, qApp, &QApplication::quit);
     
@@ -115,6 +117,10 @@ void Home::setupMenuBar()
     
     actionFileClose = menuFile->addAction("Close");
     actionFileClose->setShortcut(Qt::CTRL | Qt::Key_W);
+    
+    menuFile->addSeparator();
+
+    actionGenerateSimulator = menuFile->addAction("Generate Simulator");
     
     menuFile->addSeparator();
     
@@ -215,6 +221,27 @@ void Home::onFileClose()
     qDebug() << "Closing file";
     QMessageBox::information(this, tr("File Closed"), 
         tr("Current file has been closed."));
+}
+
+void Home::onGenerateSimulator()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save Scenario"), "",
+        tr("CSV Files (*.csv);;All Files (*)"));
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    if (Simulator::generateSimulatorCsv(fileName.toStdString())) {
+        QMessageBox::information(this, tr("Success"),
+                                 tr("Scenario data generated successfully."));
+        trajectoryView->loadTrajectoryData(fileName);
+        switchToTrajectoryView();
+    } else {
+        QMessageBox::critical(this, tr("Error"),
+                                tr("Failed to generate scenario data."));
+    }
 }
 
 void Home::onFileParser()
