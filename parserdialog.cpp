@@ -16,22 +16,22 @@
 void ParserDialog::show(QWidget *parent, const QString& initialFilePath, bool autoStart)
 {
     QDialog dialog(parent);
+    dialog.setObjectName("parserDialog");
     dialog.setWindowTitle(QObject::tr("Parser"));
     dialog.resize(1100, 700);
-    dialog.setStyleSheet("border: 1px solid gray;");
 
     auto *layout = new QVBoxLayout(&dialog);
     auto *controlsLayout = new QHBoxLayout();
 
     auto *filePathEdit = new QLineEdit(&dialog);
+    filePathEdit->setObjectName("parserFilePathEdit");
     filePathEdit->setReadOnly(true);
     filePathEdit->setPlaceholderText(QObject::tr("Select a .dat file"));
-    filePathEdit->setStyleSheet("border: 1px solid gray;");
 
     auto *openButton = new QPushButton(QObject::tr("Open"), &dialog);
-    openButton->setStyleSheet("border: 1px solid gray;");
+    openButton->setObjectName("parserOpenButton");
     auto *startButton = new QPushButton(QObject::tr("Start"), &dialog);
-    startButton->setStyleSheet("border: 1px solid gray;");
+    startButton->setObjectName("parserStartButton");
 
     controlsLayout->addWidget(filePathEdit, 1);
     controlsLayout->addWidget(openButton);
@@ -41,6 +41,7 @@ void ParserDialog::show(QWidget *parent, const QString& initialFilePath, bool au
 
     auto createTable = [&dialog](const QStringList &headers) {
         auto *table = new QTableWidget(&dialog);
+        table->setProperty("parserTable", true);
         table->setColumnCount(headers.size());
         table->setHorizontalHeaderLabels(headers);
         table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -48,10 +49,6 @@ void ParserDialog::show(QWidget *parent, const QString& initialFilePath, bool au
         table->setEditTriggers(QAbstractItemView::NoEditTriggers);
         table->setSelectionBehavior(QAbstractItemView::SelectRows);
         table->setSelectionMode(QAbstractItemView::SingleSelection);
-        table->setStyleSheet(
-            "QTableWidget { border: 2px solid gray; }\n"
-            "QTableWidget::item { border: 1px solid gray; }"
-        );
         return table;
     };
 

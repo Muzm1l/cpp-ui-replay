@@ -1,0 +1,297 @@
+/* Exact legacy style moved from inline styles to global QSS */
+
+QMainWindow#homeWindow {
+    background-color: black;
+}
+
+QMenuBar#mainMenuBar {
+    background-color: #5a5a5a;
+    color: white;
+}
+
+QMenuBar#mainMenuBar::item {
+    background-color: transparent;
+    color: white;
+    padding: 6px 10px;
+}
+
+QMenuBar#mainMenuBar::item:selected {
+    background-color: #7a7a7a;
+}
+
+QMenu {
+    background-color: #2b2b2b;
+    color: white;
+    border: 1px solid #707070;
+}
+
+QMenu::item {
+    padding: 6px 28px 6px 22px;
+    background-color: transparent;
+}
+
+QMenu::item:selected {
+    background-color: #3d6ea6;
+}
+
+QColumnView#homeTubeSelect {
+    border: 1px solid whitesmoke;
+}
+
+QGraphicsView#homeTrajectoryPlot {
+    background-color: none;
+    border: 1px solid whitesmoke;
+}
+
+QColumnView#homeTablePlot {
+    border: 1px solid whitesmoke;
+}
+
+QDialog#parserDialog {
+    border: 1px solid gray;
+}
+
+QLineEdit#parserFilePathEdit {
+    border: 1px solid gray;
+}
+
+QPushButton#parserOpenButton,
+QPushButton#parserStartButton {
+    border: 1px solid gray;
+}
+
+QTableWidget[parserTable="true"] {
+    background: transparent;
+    border: 2px solid gray;
+}
+
+QTableWidget[parserTable="true"] QWidget {
+    background: transparent;
+}
+
+QTableWidget[parserTable="true"]::item {
+    background-color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
+    border: 1px solid gray;
+}
+
+QTableWidget#eventTable {
+    gridline-color: rgb(0, 103, 238);
+    background: transparent;
+    border: 1px solid gray;
+}
+
+QTableWidget#eventTable QWidget {
+    background: transparent;
+}
+
+QTableWidget#eventTable::item {
+    padding: 5px;
+    border: 0.5px solid gray;
+    background-color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
+}
+
+QTableWidget#eventTable::item:alternate {
+    background-color: rgb(0, 0, 0);
+}
+
+QTableWidget#eventTable QHeaderView::section {
+    background-color: rgb(85, 87, 83);
+    color: white;
+    font-weight: bold;
+    padding: 5px;
+}
+
+QLabel#geoHeaderLabel {
+    background-color: rgb(85, 87, 83);
+    color: white;
+    border: 1px solid whitesmoke;
+    font-weight: bold;
+    padding-left: 5px;
+}
+
+QTableWidget#geoTable {
+    background: transparent;
+    gridline-color: rgba(255, 255, 255, 0);
+}
+
+QTableWidget#geoTable QWidget {
+    background: transparent;
+}
+
+QTableWidget#geoTable::item {
+    /* margin: 0.5px; */
+    padding: 5px;
+    border: 0.5px solid whitesmoke;
+    background-color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
+}
+
+QTreeWidget#parameterInfoTree {
+    background: #181818;
+    color: #fff;
+    border: 1px solid whitesmoke;
+}
+
+QTreeWidget#parameterInfoTree::item {
+    padding: 2px;
+}
+
+QTreeWidget#parameterInfoTree QHeaderView::section {
+    background-color: rgb(85, 87, 83);
+    color: white;
+    border: 1px solid whitesmoke;
+    font-weight: bold;
+    padding-left: 5px;
+    height: 30px;
+}
+
+QPushButton#trajectoryReplyButton {
+    background-color: rgb(45, 45, 45);
+    color: white;
+    font-weight: bold;
+    border: 1px solid darkgrey;
+}
+
+QPushButton#trajectoryReplyButton:hover {
+    background-color: rgb(60, 60, 60);
+}
+
+QPushButton#trajectoryReplyButton:pressed {
+    background-color: rgb(30, 30, 30);
+}
+
+QColumnView#trajectoryTubeSelect {
+    border: 0.5px solid darkgrey;
+}
+
+QGraphicsView#trajectoryPlotView {
+    background-color: rgb(0, 0, 0);
+    border: 0.5px solid darkgrey;
+}
+
+QWidget#trajectoryTableContainer {
+    border: 0.5px solid darkgrey;
+}
+
+QWidget#parameterTopLeftWidget,
+QWidget#parameterTopRightWidget,
+QGraphicsView#parameterTopRightGraphicsView,
+QWidget#parameterSrtWidget,
+QGraphicsView#parameterRightGraphicsView {
+    background-color: rgb(50, 50, 50);
+    border: 0.5px solid whitesmoke;
+}
+
+QLabel#acousticHeaderLabel,
+QLabel#demonHeaderLabel {
+    background-color: rgb(85, 87, 83);
+    color: white;
+    font-weight: bold;
+    padding-left: 5px;
+    border: 0.5px solid whitesmoke;
+}
+
+QGraphicsView#acousticGraphicsView,
+QGraphicsView#demonGraphicsView {
+    background-color: rgb(50, 50, 50);
+    border: 0.5px solid whitesmoke;
+}
+
+QWidget#replyScreen {
+    background-color: #ffffff;
+}
+
+QTextEdit#replyTextEdit {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+QPushButton#dangerCloseButton {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+QTableWidget#trajectoryTableWidget {
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: white;
+}
+
+QTableWidget#trajectoryTableWidget QWidget {
+    background: transparent;
+}
+
+QTableWidget#trajectoryTableWidget QHeaderView::section {
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+    padding: 1px 6px;
+    background: #2b7fb8;
+    color: white;
+}
+
+QTableWidget#trajectoryTableWidget::item {
+    border-right: 1px solid #ffffff;
+    border-bottom: 0px;
+    padding: 0px 3px;
+    color: white;
+    background: rgb(0, 0, 0);
+}
+
+QTableWidget#trajectorySubTable,
+QTableWidget#torpedoSubTable {
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: white;
+}
+
+QTableWidget#trajectorySubTable QHeaderView::section,
+QTableWidget#torpedoSubTable QHeaderView::section {
+    border-right: 0px;
+    border-bottom: 1px solid #ffffff;
+    padding: 1px 6px;
+    background: transparent; 
+    color: #39ff14;
+    font-weight: bold;
+}
+
+QTableWidget#trajectorySubTable QHeaderView,
+QTableWidget#torpedoSubTable QHeaderView {
+    border: none;
+    border-bottom: 1px solid #ffffff;
+}
+
+QTableWidget#trajectorySubTable::item,
+QTableWidget#torpedoSubTable::item {
+    border-right: 1px solid #ffffff;
+    border-bottom: 0px;
+    padding: 0px 3px;
+    color: white;
+    background: rgb(0, 0, 0);
+}
+
+QTableWidget#trajectorySubTable[multiColumnTable="true"]::item,
+QTableWidget#torpedoSubTable[multiColumnTable="true"]::item {
+    border-right: 0px;
+}
+
+QPushButton#miniCloseButton {
+    background: #e70a0a;
+    border: 1px solid #888;
+    font-weight: bold;
+    color: #ffffff;
+    padding: 0px;
+    margin: 0px;
+}
+
+QPushButton#miniCloseButton:hover {
+    background: rgb(250, 0, 0);
+}

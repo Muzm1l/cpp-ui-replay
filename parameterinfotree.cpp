@@ -4,20 +4,9 @@
 ParameterInfoTree::ParameterInfoTree(QWidget *parent)
     : QTreeWidget(parent)
 {
+    setObjectName("parameterInfoTree");
     setHeaderLabel("Parameter Information");
     setMinimumHeight(120);
-    setStyleSheet(
-        "QTreeWidget { background: #181818; color: #fff; border: 1px solid whitesmoke; } "
-        "QTreeView::item { padding: 2px; } "
-        "QHeaderView::section { "
-        "background-color: rgb(85, 87, 83); "
-        "color: white; "
-        "border: 1px solid whitesmoke; "
-        "font-weight: bold; "
-        "padding-left: 5px; "
-        "height: 30px; "
-        "}"
-    );
     header()->setMinimumHeight(30);
     header()->setMaximumHeight(30);
     header()->setDefaultAlignment(Qt::AlignCenter);

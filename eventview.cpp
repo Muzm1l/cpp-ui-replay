@@ -9,6 +9,7 @@ EventView::EventView(QWidget *parent)
     layout->setSpacing(0);
     
     eventTable = new QTableWidget(this);
+    eventTable->setObjectName("eventTable");
     setupTable();
     layout->addWidget(eventTable);
     
@@ -39,29 +40,6 @@ void EventView::setupTable()
     
     // Hide row headers
     eventTable->verticalHeader()->setVisible(false);
-    
-    // Apply the same style as geographical information table
-    eventTable->setStyleSheet(
-        "QTableWidget { \n"
-        "  gridline-color: rgb(0, 103, 238);\n"
-        "  background-color: rgb(0, 0, 0);\n"
-        "  border: 1px solid gray;\n"
-        "}\n"
-        "QTableWidget::item {\n"
-        "  padding: 5px;\n"
-        "  border: 0.5px solid gray;\n"
-        "  background-color: rgb(100, 100, 100);\n"
-        "  color: rgb(255, 255, 255);\n"
-        "}\n"
-        "QTableWidget::item:alternate {\n"
-        "  background-color: rgb(0, 0, 0);\n"
-        "}"
-    );
-    
-    eventTable->horizontalHeader()->setStyleSheet(
-        "QHeaderView::section { background-color: rgb(85, 87, 83); "
-        "color: white; font-weight: bold; padding: 5px; }"
-    );
     
     eventTable->setFrameShape(QFrame::NoFrame);
     eventTable->setFrameShadow(QFrame::Raised);

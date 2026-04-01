@@ -48,9 +48,13 @@ HEADERS += \
     replyscreen.h \
     simulator.h
 
+RESOURCES += \
+    resources.qrc
+
 # Show non-GUI parser/analyzer/decoder files in Qt Creator project tree
 DISTFILES += \
     README.md \
+    style.qss \
     parser.cpp \
     parser.h
 

@@ -24,15 +24,15 @@ void DemonGraph::setupUI()
     
     // Header Label
     headerLabel = new QLabel("DEMON Analysis");
+    headerLabel->setObjectName("demonHeaderLabel");
     headerLabel->setMinimumHeight(30);
     headerLabel->setMaximumHeight(30);
-    headerLabel->setStyleSheet("background-color: rgb(85, 87, 83); color: white; font-weight: bold; padding-left: 5px; border: 0.5px solid whitesmoke;");
     headerLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(headerLabel);
     
     // Graphics View for displaying graphs
     graphicsView = new QGraphicsView(this);
-    graphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
+    graphicsView->setObjectName("demonGraphicsView");
     graphicsView->setRenderHint(QPainter::Antialiasing);
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

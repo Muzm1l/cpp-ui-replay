@@ -1,19 +1,46 @@
 # Build directories
 build/
 
-# Object files
+# Qt/qmake generated files
+moc/
+obj/
+rcc/
+ui_*.h
+moc_*.cpp
+qrc_*.cpp
+Makefile*
+
+# Object and library files
 *.o
 *.obj
 *.a
 *.so
+*.so.*
 *.dll
+*.dylib
 
-# Executables
+# Executables and debug symbols
 FiringAnalysis
+cpp_lib_reply
 *.exe
+*.out
+*.app
+*.dSYM/
 
-# IDE
+# Parser/output artifacts
+parser
+
+# IDE and tooling
 .vscode/
 .idea/
+.qtc_clangd/
+compile_commands.json
 *.pro.user
 *.pro.user.*
+
+# OS/editor temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

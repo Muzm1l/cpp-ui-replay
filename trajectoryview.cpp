@@ -147,27 +147,14 @@ void TrajectoryView::setupUI()
     tubeSelectLayout->setSpacing(5);
     
     replyButton = new QPushButton("Reply");
+    replyButton->setObjectName("trajectoryReplyButton");
     replyButton->setMinimumHeight(30);
     replyButton->setMaximumWidth(200);
-    replyButton->setStyleSheet(
-        "QPushButton {\n"
-        "  background-color: rgb(45, 45, 45);\n"
-        "  color: white;\n"
-        "  font-weight: bold;\n"
-        "  border: 1px solid darkgrey;\n"
-        "}\n"
-        "QPushButton:hover {\n"
-        "  background-color: rgb(60, 60, 60);\n"
-        "}\n"
-        "QPushButton:pressed {\n"
-        "  background-color: rgb(30, 30, 30);\n"
-        "}"
-    );
     tubeSelectLayout->addWidget(replyButton);
     
     tubeSelect = new QColumnView();
+    tubeSelect->setObjectName("trajectoryTubeSelect");
     tubeSelect->setMaximumWidth(200);
-    tubeSelect->setStyleSheet("border: 0.5px solid darkgrey;");
     tubeSelectLayout->addWidget(tubeSelect);
 
     QHBoxLayout *animationButtonsLayout = new QHBoxLayout();
@@ -184,7 +171,7 @@ void TrajectoryView::setupUI()
     
     // Trajectory Plot
     trajectoryPlot = new QGraphicsView();
-    trajectoryPlot->setStyleSheet("background-color: rgb(0, 0, 0); border: 0.5px solid darkgrey;");
+    trajectoryPlot->setObjectName("trajectoryPlotView");
     trajectoryPlot->setFrameShape(QFrame::NoFrame);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
     trajectoryPlot->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -196,13 +183,12 @@ void TrajectoryView::setupUI()
     // Table Plot
     
     tablePlot = new TrajectoryTable();
-    tablePlot->setFrameShadow(QFrame::Sunken);
     // Add a container widget for tablePlot to provide margin
     QWidget *tablePlotContainer = new QWidget();
+    tablePlotContainer->setObjectName("trajectoryTableContainer");
     QVBoxLayout *tablePlotContainerLayout = new QVBoxLayout(tablePlotContainer);
     tablePlotContainerLayout->setContentsMargins(10, 10, 10, 10); // Add space around the table
     tablePlotContainerLayout->addWidget(tablePlot, 0, Qt::AlignTop);
-    tablePlotContainer->setStyleSheet("border: 0.5px solid darkgrey;");
     rightLayout->addWidget(tablePlotContainer, 1);
     
     // Add to main layout

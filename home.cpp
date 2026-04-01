@@ -36,8 +36,7 @@ Home::Home(QWidget *parent)
 {
     // Setup the window
     setWindowTitle("Home");
-    // Set the main window background color to black
-    this->setStyleSheet("background-color: black;");
+    setObjectName("homeWindow");
     // Create main UI
     setupUI();
     
@@ -94,18 +93,7 @@ void Home::setupUI()
 void Home::setupMenuBar()
 {
     menuBar = new QMenuBar(this);
-
-    // Style both the menubar and the dropdown popup menus so the items
-    // remain readable on dark window backgrounds.
-    menuBar->setStyleSheet(
-        "QMenuBar { background-color: #5a5a5a; color: white; }\n"
-        "QMenuBar::item { background-color: transparent; color: white; padding: 6px 10px; }\n"
-        "QMenuBar::item:selected { background-color: #7a7a7a; }\n"
-        "QMenu { background-color: #2b2b2b; color: white; border: 1px solid #707070; }\n"
-        "QMenu::item { padding: 6px 28px 6px 22px; background-color: transparent; }\n"
-        "QMenu::item:selected { background-color: #3d6ea6; }\n"
-        "QMenu::separator { height: 1px; background: #707070; margin: 6px 8px; }\n"
-    );
+    menuBar->setObjectName("mainMenuBar");
     menuBar->setFixedHeight(32);
     setMenuBar(menuBar);
     
@@ -361,15 +349,15 @@ void Home::setupHomeWidget()
     tubeSelectLayout->setSpacing(5);
     
     tubeSelect = new QColumnView();
+    tubeSelect->setObjectName("homeTubeSelect");
     tubeSelect->setMaximumWidth(150);
-    tubeSelect->setStyleSheet("border: 1px solid whitesmoke;");
     tubeSelectLayout->addWidget(tubeSelect);
     
     topRightLayout->addLayout(tubeSelectLayout);
     
     // Trajectory Plot
     trajectoryPlot = new QGraphicsView();
-    trajectoryPlot->setStyleSheet("background-color: none ; border: 1px solid whitesmoke;");
+    trajectoryPlot->setObjectName("homeTrajectoryPlot");
     trajectoryPlot->setFrameShape(QFrame::Box);
     trajectoryPlot->setRenderHint(QPainter::Antialiasing);
     topRightLayout->addWidget(trajectoryPlot);
@@ -378,8 +366,8 @@ void Home::setupHomeWidget()
     
     // Table Plot
     tablePlot = new QColumnView();
+    tablePlot->setObjectName("homeTablePlot");
     tablePlot->setFrameShadow(QFrame::Sunken);
-    tablePlot->setStyleSheet("border: 1px solid whitesmoke;");
     rightLayout->addWidget(tablePlot, 1);
     
     // Add to main layout

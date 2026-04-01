@@ -80,8 +80,8 @@ void ParametrView::setupRightLayout()
     
     // Left part with 4 sliders (AT, AD, AY, AX)
     QWidget *topLeftWidget = new QWidget();
+    topLeftWidget->setObjectName("parameterTopLeftWidget");
     topLeftWidget->setFixedWidth(400);
-    topLeftWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
     QHBoxLayout *topLeftLayout = new QHBoxLayout(topLeftWidget);
     topLeftLayout->setContentsMargins(10, 10, 10, 10);
     topLeftLayout->setSpacing(20);
@@ -131,13 +131,13 @@ void ParametrView::setupRightLayout()
     
     // Right part with graphics view
     QWidget *topRightWidget = new QWidget();
-    topRightWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
+    topRightWidget->setObjectName("parameterTopRightWidget");
     QVBoxLayout *topRightLayout = new QVBoxLayout(topRightWidget);
     topRightLayout->setContentsMargins(0, 0, 0, 0);
     
     topRightScene = new QGraphicsScene(this);
     topRightGraphicsView = new QGraphicsView(topRightScene, this);
-    topRightGraphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
+    topRightGraphicsView->setObjectName("parameterTopRightGraphicsView");
     topRightGraphicsView->setFrameShape(QFrame::NoFrame);
     topRightLayout->addWidget(topRightGraphicsView);
     
@@ -147,7 +147,7 @@ void ParametrView::setupRightLayout()
     
     // Middle section with SRT slider
     QWidget *srtWidget = new QWidget();
-    srtWidget->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
+    srtWidget->setObjectName("parameterSrtWidget");
     srtWidget->setMinimumHeight(80);
     srtWidget->setMaximumHeight(80);
     srtWidget->setFixedWidth(1100); // Set fixed width for middle section
@@ -167,7 +167,7 @@ void ParametrView::setupRightLayout()
     // Bottom section with graphics view
     rightScene = new QGraphicsScene(this);
     rightGraphicsView = new QGraphicsView(rightScene, this);
-    rightGraphicsView->setStyleSheet("background-color: rgb(50, 50, 50); border: 0.5px solid whitesmoke;");
+    rightGraphicsView->setObjectName("parameterRightGraphicsView");
     rightGraphicsView->setMinimumHeight(300);
     rightLayout->addWidget(rightGraphicsView, 2);
 }
