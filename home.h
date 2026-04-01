@@ -31,7 +31,6 @@ private slots:
     void onFileOpen();
     void onFileClose();
     void onFileParser();
-    void onGenerateSimulator();
     void onViewParameter();
     void onViewEvent();
     void onViewTrajectory();
@@ -55,7 +54,6 @@ private:
     // Menu actions
     QAction *actionFileOpen;
     QAction *actionFileClose;
-    QAction *actionGenerateSimulator;
     QAction *actionFileParser;
     QAction *actionFileExit;
     QAction *actionViewParameter;

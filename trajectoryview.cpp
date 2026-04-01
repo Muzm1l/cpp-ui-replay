@@ -9,7 +9,6 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
-#include <QPushButton>
 #include <QPen>
 #include <QBrush>
 #include <QFont>
@@ -21,8 +20,6 @@
 #include <QtMath>
 #include <cstdlib>
 #include <QRandomGenerator>
-#include <fstream>
-#include <sstream>
 
 TrajectoryView::TrajectoryView(QWidget *parent)
     : QWidget(parent)
@@ -34,8 +31,6 @@ TrajectoryView::TrajectoryView(QWidget *parent)
     , geoInfo(nullptr)
     , replyButton(nullptr)
     , trajectoryScene(nullptr)
-    , animationTimer(new QTimer(this))
-    , currentStep(0)
 {
     setupUI();
     initTrajectoryPlot();
@@ -44,58 +39,7 @@ TrajectoryView::TrajectoryView(QWidget *parent)
     trajectoryPlot->installEventFilter(this);
     
     populateDummyData();
-
-    connect(animationTimer, &QTimer::timeout, this, &TrajectoryView::updateAnimation);
 }
-
-void TrajectoryView::loadTrajectoryData(const QString &filePath)
-{
-    trajectoryData.clear();
-    std::ifstream file(filePath.toStdString());
-    if (!file.is_open()) {
-        return;
-    }
-
-    std::string line;
-    // Skip header
-    std::getline(file, line);
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string value;
-        Simulator::Sample sample;
-
-        std::getline(ss, sample.timestamp, ',');
-        std::getline(ss, value, ',');
-        sample.ownSpeedKnots = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.ownHeadingDeg = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.targetSpeedKnots = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.targetHeadingDeg = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.torpedoSpeedKnots = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.torpedoHeadingDeg = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.targetX = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.targetY = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.torpedoX = std::stod(value);
-        std::getline(ss, value, ',');
-        sample.torpedoY = std::stod(value);
-
-        trajectoryData.push_back(sample);
-    }
-
-    file.close();
-    populateDummyData();
-    plotTrajectory(trajectoryData.size());
-}
-
-
 
 TrajectoryView::~TrajectoryView()
 {
@@ -169,16 +113,6 @@ void TrajectoryView::setupUI()
     tubeSelect->setMaximumWidth(200);
     tubeSelect->setStyleSheet("border: 0.5px solid darkgrey;");
     tubeSelectLayout->addWidget(tubeSelect);
-
-    QHBoxLayout *animationButtonsLayout = new QHBoxLayout();
-    QPushButton *startButton = new QPushButton("Start");
-    QPushButton *stopButton = new QPushButton("Stop");
-    animationButtonsLayout->addWidget(startButton);
-    animationButtonsLayout->addWidget(stopButton);
-    tubeSelectLayout->addLayout(animationButtonsLayout);
-
-    connect(startButton, &QPushButton::clicked, this, &TrajectoryView::startAnimation);
-    connect(stopButton, &QPushButton::clicked, this, &TrajectoryView::stopAnimation);
     
     topRightLayout->addLayout(tubeSelectLayout);
     
@@ -212,29 +146,6 @@ void TrajectoryView::setupUI()
 
     connect(replyButton, &QPushButton::clicked, this, &TrajectoryView::on_replyButton_clicked);
 }
-
-void TrajectoryView::startAnimation()
-{
-    currentStep = 0;
-    animationTimer->start(100); // Update every 100ms
-}
-
-void TrajectoryView::stopAnimation()
-{
-    animationTimer->stop();
-}
-
-void TrajectoryView::updateAnimation()
-{
-    if (currentStep >= trajectoryData.size()) {
-        animationTimer->stop();
-        return;
-    }
-
-    plotTrajectory(currentStep);
-    currentStep++;
-}
-
 
 void TrajectoryView::on_replyButton_clicked()
 {
@@ -273,34 +184,6 @@ void TrajectoryView::initTrajectoryPlot()
         trajectoryPlot->setCursor(Qt::OpenHandCursor);
     } else {
         trajectoryPlot->setCursor(Qt::ArrowCursor);
-    }
-}
-
-void TrajectoryView::plotTrajectory(size_t currentStep)
-{
-    trajectoryScene->clear();
-    initTrajectoryPlot();
-
-    if (trajectoryData.size() < 2) {
-        return;
-    }
-
-    QPen targetPen(QColor(128, 128, 128)); // gray
-    targetPen.setWidth(2);
-
-    QPen torpedoPen(QColor(0, 51, 102)); // darkBlue
-    torpedoPen.setWidth(2);
-
-    for (size_t i = 1; i < currentStep; ++i) {
-        if (i >= trajectoryData.size()) break;
-        const auto& prev = trajectoryData[i - 1];
-        const auto& curr = trajectoryData[i];
-
-        // Draw target trajectory
-        trajectoryScene->addLine(prev.targetX, prev.targetY, curr.targetX, curr.targetY, targetPen);
-
-        // Draw torpedo trajectory
-        trajectoryScene->addLine(prev.torpedoX, prev.torpedoY, curr.torpedoX, curr.torpedoY, torpedoPen);
     }
 }
 
