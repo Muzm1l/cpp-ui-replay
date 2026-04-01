@@ -4,6 +4,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
+TARGET = cpp_lib_reply
+
 # Specify build directories for generated files
 MOC_DIR = build/moc
 OBJECTS_DIR = build/obj
@@ -27,7 +29,8 @@ SOURCES += \
     demongraph.cpp \
     trajectorytable.cpp \
     parameterinfotree.cpp \
-    replyscreen.cpp
+    replyscreen.cpp \
+    simulator.cpp
 
 HEADERS += \
     parser.h \
@@ -42,7 +45,8 @@ HEADERS += \
     demongraph.h \
     parameterinfotree.h \
     trajectorytable.h \
-    replyscreen.h
+    replyscreen.h \
+    simulator.h
 
 # Show non-GUI parser/analyzer/decoder files in Qt Creator project tree
 DISTFILES += \
