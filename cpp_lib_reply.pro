@@ -29,7 +29,7 @@ SOURCES += \
     demongraph.cpp \
     trajectorytable.cpp \
     parameterinfotree.cpp \
-    replyscreen.cpp \
+    replayscreen.cpp \
     simulator.cpp
 
 HEADERS += \
@@ -45,7 +45,7 @@ HEADERS += \
     demongraph.h \
     parameterinfotree.h \
     trajectorytable.h \
-    replyscreen.h \
+    replayscreen.h \
     simulator.h
 
 RESOURCES += \

@@ -45,29 +45,52 @@ std::string formatTimestamp(const std::chrono::system_clock::time_point& timePoi
 
 namespace Simulator {
 
-std::vector<Sample> generateSimulatorSamples(int durationSeconds, int stepSeconds, std::uint32_t seed) {
+std::vector<Sample> generateSimulatorSamples(int durationSeconds,
+                                             int stepSeconds,
+                                             std::uint32_t seed,
+                                             std::size_t targetCount,
+                                             std::size_t selectedTargetIndex) {
     std::vector<Sample> samples;
     if (durationSeconds <= 0 || stepSeconds <= 0) {
         return samples;
     }
 
     std::mt19937 generator(seed == 0 ? std::random_device{}() : seed);
-    std::uniform_real_distribution<double> targetSpeedKnotsDist(8.0, 20.0);
+    std::uniform_real_distribution<double> ownSpeedKnotsDist(10.0, 16.0);
+    std::uniform_real_distribution<double> ownHeadingDist(20.0, 55.0);
+    std::uniform_real_distribution<double> targetSpeedKnotsDist(8.0, 22.0);
     std::uniform_real_distribution<double> targetHeadingDist(0.0, 359.0);
-    std::uniform_real_distribution<double> targetXDist(2500.0, 5000.0);
-    std::uniform_real_distribution<double> targetYDist(1000.0, 3000.0);
+    std::uniform_real_distribution<double> targetRangeDist(2200.0, 5600.0);
+    std::uniform_real_distribution<double> targetBearingDist(5.0, 355.0);
 
-    const double ownSpeedKnots = 0.0;
-    const double ownHeadingDeg = 0.0;
+    const double ownSpeedKnots = ownSpeedKnotsDist(generator);
+    const double ownHeadingDeg = ownHeadingDist(generator);
+    double ownX = 0.0;
+    double ownY = 0.0;
 
-    double targetSpeedKnots = targetSpeedKnotsDist(generator);
-    double targetHeadingDeg = targetHeadingDist(generator);
-    double targetX = targetXDist(generator);
-    double targetY = targetYDist(generator);
+    const std::size_t safeTargetCount = targetCount == 0 ? 1 : targetCount;
+    std::vector<TargetState> targets;
+    std::vector<double> targetBaseHeadings;
+    targets.reserve(safeTargetCount);
+    targetBaseHeadings.reserve(safeTargetCount);
+    for (std::size_t i = 0; i < safeTargetCount; ++i) {
+        const double bearingDeg = targetBearingDist(generator);
+        const double rangeMeters = targetRangeDist(generator);
+        const double bearingRad = toRadians(bearingDeg);
+        const double baseHeadingDeg = targetHeadingDist(generator);
+        targets.push_back(TargetState{
+            rangeMeters * std::sin(bearingRad),
+            rangeMeters * std::cos(bearingRad),
+            targetSpeedKnotsDist(generator),
+            baseHeadingDeg
+        });
+        targetBaseHeadings.push_back(baseHeadingDeg);
+    }
 
-    const int torpedoLaunchTimeSec = 10;
+    const int torpedoLaunchTimeSec = 22;
     const double torpedoSpeedKnots = 42.0;
     bool torpedoLaunched = false;
+    bool torpedoHitTarget = false;
     double torpedoX = 0.0;
     double torpedoY = 0.0;
     double torpedoHeadingDeg = 0.0;
@@ -79,25 +102,59 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds, int stepSecond
         const auto currentTime = startTime + std::chrono::seconds(elapsed);
         const std::string timestamp = formatTimestamp(currentTime);
 
-        const double targetStepMeters = targetSpeedKnots * kKnotsToMetersPerSecond * static_cast<double>(stepSeconds);
-        const double targetHeadingRad = toRadians(targetHeadingDeg);
-        targetX += targetStepMeters * std::sin(targetHeadingRad);
-        targetY += targetStepMeters * std::cos(targetHeadingRad);
+        const double ownStepMeters = ownSpeedKnots * kKnotsToMetersPerSecond * static_cast<double>(stepSeconds);
+        const double ownHeadingRad = toRadians(ownHeadingDeg);
+        ownX += ownStepMeters * std::sin(ownHeadingRad);
+        ownY += ownStepMeters * std::cos(ownHeadingRad);
 
-        double torpedoSpeedOut = 0.0;
-        if (elapsed >= torpedoLaunchTimeSec) {
-            torpedoLaunched = true;
+        for (std::size_t i = 0; i < targets.size(); ++i) {
+            TargetState& target = targets[i];
+            const double headingAmplitudeDeg = 1.2 + (0.5 * static_cast<double>(i % 3));
+            const double headingPhase = 0.7 * static_cast<double>(i + 1);
+            const double headingPeriod = 55.0 + (8.0 * static_cast<double>(i));
+            double headingDeg = targetBaseHeadings[i] +
+                                (headingAmplitudeDeg * std::sin((static_cast<double>(elapsed) / headingPeriod) + headingPhase));
+            headingDeg = std::fmod(headingDeg, 360.0);
+            if (headingDeg < 0.0) {
+                headingDeg += 360.0;
+            }
+            target.headingDeg = headingDeg;
+
+            const double targetStepMeters = target.speedKnots * kKnotsToMetersPerSecond * static_cast<double>(stepSeconds);
+            const double targetHeadingRad = toRadians(target.headingDeg);
+            target.x += targetStepMeters * std::sin(targetHeadingRad);
+            target.y += targetStepMeters * std::cos(targetHeadingRad);
         }
 
-        if (torpedoLaunched) {
-            const double dx = targetX - torpedoX;
-            const double dy = targetY - torpedoY;
+        const std::size_t selectedIndex = std::min(selectedTargetIndex, targets.size() - 1);
+        const TargetState& selectedTarget = targets[selectedIndex];
+
+        double torpedoSpeedOut = 0.0;
+        if (!torpedoLaunched && elapsed >= torpedoLaunchTimeSec) {
+            torpedoLaunched = true;
+            torpedoX = ownX;
+            torpedoY = ownY;
+        }
+
+        if (torpedoLaunched && !torpedoHitTarget) {
+            const double dx = selectedTarget.x - torpedoX;
+            const double dy = selectedTarget.y - torpedoY;
+            const double targetRange = std::hypot(dx, dy);
+
+            if (targetRange <= 35.0) {
+                torpedoHitTarget = true;
+                torpedoX = selectedTarget.x;
+                torpedoY = selectedTarget.y;
+            }
+
             torpedoHeadingDeg = toDegrees(std::atan2(dx, dy));
 
             const double torpedoStepMeters = torpedoSpeedKnots * kKnotsToMetersPerSecond * static_cast<double>(stepSeconds);
             const double torpedoHeadingRad = toRadians(torpedoHeadingDeg);
-            torpedoX += torpedoStepMeters * std::sin(torpedoHeadingRad);
-            torpedoY += torpedoStepMeters * std::cos(torpedoHeadingRad);
+            if (!torpedoHitTarget) {
+                torpedoX += torpedoStepMeters * std::sin(torpedoHeadingRad);
+                torpedoY += torpedoStepMeters * std::cos(torpedoHeadingRad);
+            }
             torpedoSpeedOut = torpedoSpeedKnots;
         }
 
@@ -105,14 +162,18 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds, int stepSecond
             timestamp,
             ownSpeedKnots,
             ownHeadingDeg,
-            targetSpeedKnots,
-            targetHeadingDeg,
+            ownX,
+            ownY,
+            selectedTarget.speedKnots,
+            selectedTarget.headingDeg,
             torpedoSpeedOut,
             torpedoHeadingDeg,
-            targetX,
-            targetY,
+            selectedTarget.x,
+            selectedTarget.y,
             torpedoX,
-            torpedoY
+            torpedoY,
+            targets,
+            selectedIndex
         });
     }
 
@@ -134,19 +195,37 @@ bool generateSimulatorCsv(const std::string& filePath, int durationSeconds, int 
         return false;
     }
 
-    file << "timestamp,own_speed_knots,own_heading_deg,target_speed_knots,target_heading_deg,torpedo_speed_knots,torpedo_heading_deg\n";
+    file << "timestamp,own_speed_knots,own_heading_deg,own_x,own_y,target_speed_knots,target_heading_deg,target_x,target_y,torpedo_speed_knots,torpedo_heading_deg,torpedo_x,torpedo_y\n";
     for (const Sample& sample : samples) {
         file << sample.timestamp << ","
              << std::fixed << std::setprecision(3)
              << sample.ownSpeedKnots << ","
              << sample.ownHeadingDeg << ","
+             << sample.ownX << ","
+             << sample.ownY << ","
              << sample.targetSpeedKnots << ","
              << sample.targetHeadingDeg << ","
+             << sample.targetX << ","
+             << sample.targetY << ","
              << sample.torpedoSpeedKnots << ","
-             << sample.torpedoHeadingDeg << "\n";
+             << sample.torpedoHeadingDeg << ","
+             << sample.torpedoX << ","
+             << sample.torpedoY << "\n";
     }
 
     return true;
+}
+
+std::vector<Sample> generateScenarioSamples(int durationSeconds,
+                                            int stepSeconds,
+                                            std::uint32_t seed,
+                                            std::size_t targetCount,
+                                            std::size_t selectedTargetIndex) {
+    return generateSimulatorSamples(durationSeconds, stepSeconds, seed, targetCount, selectedTargetIndex);
+}
+
+bool generateScenarioCsv(const std::string& filePath, int durationSeconds, int stepSeconds) {
+    return generateSimulatorCsv(filePath, durationSeconds, stepSeconds);
 }
 
 } // namespace Simulator

@@ -64,7 +64,7 @@ SOURCES       = main.cpp \
 		demongraph.cpp \
 		trajectorytable.cpp \
 		parameterinfotree.cpp \
-		replyscreen.cpp \
+		replayscreen.cpp \
 		simulator.cpp build/rcc/qrc_resources.cpp \
 		build/moc/moc_home.cpp \
 		build/moc/moc_eventview.cpp \
@@ -75,7 +75,7 @@ SOURCES       = main.cpp \
 		build/moc/moc_demongraph.cpp \
 		build/moc/moc_parameterinfotree.cpp \
 		build/moc/moc_trajectorytable.cpp \
-		build/moc/moc_replyscreen.cpp
+		build/moc/moc_replayscreen.cpp
 OBJECTS       = build/obj/main.o \
 		build/obj/home.o \
 		build/obj/parser.o \
@@ -88,7 +88,7 @@ OBJECTS       = build/obj/main.o \
 		build/obj/demongraph.o \
 		build/obj/trajectorytable.o \
 		build/obj/parameterinfotree.o \
-		build/obj/replyscreen.o \
+		build/obj/replayscreen.o \
 		build/obj/simulator.o \
 		build/obj/qrc_resources.o \
 		build/obj/moc_home.o \
@@ -100,7 +100,7 @@ OBJECTS       = build/obj/main.o \
 		build/obj/moc_demongraph.o \
 		build/obj/moc_parameterinfotree.o \
 		build/obj/moc_trajectorytable.o \
-		build/obj/moc_replyscreen.o
+		build/obj/moc_replayscreen.o
 DIST          = README.md \
 		style.qss \
 		parser.cpp \
@@ -352,7 +352,7 @@ DIST          = README.md \
 		demongraph.h \
 		parameterinfotree.h \
 		trajectorytable.h \
-		replyscreen.h \
+		replayscreen.h \
 		simulator.h main.cpp \
 		home.cpp \
 		parser.cpp \
@@ -365,7 +365,7 @@ DIST          = README.md \
 		demongraph.cpp \
 		trajectorytable.cpp \
 		parameterinfotree.cpp \
-		replyscreen.cpp \
+		replayscreen.cpp \
 		simulator.cpp
 QMAKE_TARGET  = cpp_lib_reply
 DESTDIR       = 
@@ -875,8 +875,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents ../Qt/6.10.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h replyscreen.h simulator.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp replyscreen.cpp simulator.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h replayscreen.h simulator.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp replayscreen.cpp simulator.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -914,9 +914,9 @@ compiler_moc_predefs_clean:
 build/moc/moc_predefs.h: ../Qt/6.10.1/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -fPIC -dM -E -o build/moc/moc_predefs.h ../Qt/6.10.1/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replyscreen.cpp
+compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replayscreen.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replyscreen.cpp
+	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replayscreen.cpp
 build/moc/moc_home.cpp: home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QMainWindow \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qmainwindow.h \
@@ -1149,6 +1149,8 @@ build/moc/moc_home.cpp: home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qmenu.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QMenu \
 		../Qt/6.10.1/gcc_64/include/QtGui/QAction \
+		../Qt/6.10.1/gcc_64/include/QtGui/QActionGroup \
+		../Qt/6.10.1/gcc_64/include/QtGui/qactiongroup.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QStatusBar \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qstatusbar.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
@@ -1186,16 +1188,19 @@ build/moc/moc_home.cpp: home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		trajectorytable.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
-		replyscreen.h \
 		simulator.h \
+		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPointF \
 		parserdialog.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QDialog \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qdialog.h \
@@ -1916,6 +1921,8 @@ build/moc/moc_trajectoryview.cpp: trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QColumnView \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qcolumnview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		geographicalinfo.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qboxlayout.h \
@@ -1931,10 +1938,11 @@ build/moc/moc_trajectoryview.cpp: trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
 		acousticpanorama.h \
 		demongraph.h \
-		replyscreen.h \
 		simulator.h \
+		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPointF \
 		build/moc/moc_predefs.h \
 		../Qt/6.10.1/gcc_64/libexec/moc
 	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectoryview.h -o build/moc/moc_trajectoryview.cpp
@@ -3063,7 +3071,7 @@ build/moc/moc_trajectorytable.cpp: trajectorytable.h \
 		../Qt/6.10.1/gcc_64/libexec/moc
 	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectorytable.h -o build/moc/moc_trajectorytable.cpp
 
-build/moc/moc_replyscreen.cpp: replyscreen.h \
+build/moc/moc_replayscreen.cpp: replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QWidget \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qwidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
@@ -3261,9 +3269,10 @@ build/moc/moc_replyscreen.cpp: replyscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/qinputmethod.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qlocale.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/qguiapplication_platform.h \
+		simulator.h \
 		build/moc/moc_predefs.h \
 		../Qt/6.10.1/gcc_64/libexec/moc
-	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include replyscreen.h -o build/moc/moc_replyscreen.cpp
+	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include replayscreen.h -o build/moc/moc_replayscreen.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -3513,6 +3522,8 @@ build/obj/main.o: main.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qmenu.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QMenu \
 		../Qt/6.10.1/gcc_64/include/QtGui/QAction \
+		../Qt/6.10.1/gcc_64/include/QtGui/QActionGroup \
+		../Qt/6.10.1/gcc_64/include/QtGui/qactiongroup.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QStatusBar \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qstatusbar.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
@@ -3550,16 +3561,19 @@ build/obj/main.o: main.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		trajectorytable.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
-		replyscreen.h \
 		simulator.h \
+		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPointF \
 		parserdialog.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QDialog \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qdialog.h \
@@ -3802,6 +3816,8 @@ build/obj/home.o: home.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qmenu.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QMenu \
 		../Qt/6.10.1/gcc_64/include/QtGui/QAction \
+		../Qt/6.10.1/gcc_64/include/QtGui/QActionGroup \
+		../Qt/6.10.1/gcc_64/include/QtGui/qactiongroup.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QStatusBar \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qstatusbar.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
@@ -3839,16 +3855,19 @@ build/obj/home.o: home.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		trajectorytable.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
-		replyscreen.h \
 		simulator.h \
+		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPointF \
 		parserdialog.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QDialog \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qdialog.h \
@@ -3872,7 +3891,8 @@ build/obj/home.o: home.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QApplication \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qapplication.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/QBrush \
-		../Qt/6.10.1/gcc_64/include/QtCore/QFileInfo
+		../Qt/6.10.1/gcc_64/include/QtCore/QFileInfo \
+		../Qt/6.10.1/gcc_64/include/QtCore/QDir
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/home.o home.cpp
 
 build/obj/parser.o: parser.cpp parser.h \
@@ -4847,6 +4867,8 @@ build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QColumnView \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qcolumnview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		geographicalinfo.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qboxlayout.h \
@@ -4862,10 +4884,11 @@ build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
 		acousticpanorama.h \
 		demongraph.h \
-		replyscreen.h \
 		simulator.h \
+		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPointF \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHeaderView \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qheaderview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QTableWidgetItem \
@@ -4874,6 +4897,7 @@ build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/QBrush \
 		../Qt/6.10.1/gcc_64/include/QtGui/QFont \
 		../Qt/6.10.1/gcc_64/include/QtGui/QWheelEvent \
+		../Qt/6.10.1/gcc_64/include/QtGui/QMouseEvent \
 		../Qt/6.10.1/gcc_64/include/QtCore/QEvent \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
@@ -5112,7 +5136,8 @@ build/obj/geographicalinfo.o: geographicalinfo.cpp geographicalinfo.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qheaderview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QTableWidgetItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qaction.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/QAction
+		../Qt/6.10.1/gcc_64/include/QtGui/QAction \
+		../Qt/6.10.1/gcc_64/include/QtCore/QSignalBlocker
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/geographicalinfo.o geographicalinfo.cpp
 
 build/obj/acousticpanorama.o: acousticpanorama.cpp acousticpanorama.h \
@@ -6018,7 +6043,7 @@ build/obj/parameterinfotree.o: parameterinfotree.cpp parameterinfotree.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qheaderview.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/parameterinfotree.o parameterinfotree.cpp
 
-build/obj/replyscreen.o: replyscreen.cpp replyscreen.h \
+build/obj/replayscreen.o: replayscreen.cpp replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QWidget \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qwidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
@@ -6216,24 +6241,35 @@ build/obj/replyscreen.o: replyscreen.cpp replyscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/qinputmethod.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qlocale.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/qguiapplication_platform.h \
+		simulator.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qboxlayout.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qlayout.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qlayoutitem.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgridlayout.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QTextEdit \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qtextedit.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsView \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsview.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainter.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtextoption.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpen.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollarea.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qframe.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qtextdocument.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qtextoption.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qtextcursor.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qtextformat.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qpen.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsscene.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsTextItem \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
+		../Qt/6.10.1/gcc_64/include/QtGui/QResizeEvent \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/replyscreen.o replyscreen.cpp
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/QPen \
+		../Qt/6.10.1/gcc_64/include/QtGui/QBrush \
+		../Qt/6.10.1/gcc_64/include/QtGui/QColor \
+		../Qt/6.10.1/gcc_64/include/QtCore/QtMath
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/replayscreen.o replayscreen.cpp
 
 build/obj/simulator.o: simulator.cpp simulator.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/simulator.o simulator.cpp
@@ -6268,8 +6304,8 @@ build/obj/moc_parameterinfotree.o: build/moc/moc_parameterinfotree.cpp
 build/obj/moc_trajectorytable.o: build/moc/moc_trajectorytable.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_trajectorytable.o build/moc/moc_trajectorytable.cpp
 
-build/obj/moc_replyscreen.o: build/moc/moc_replyscreen.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_replyscreen.o build/moc/moc_replyscreen.cpp
+build/obj/moc_replayscreen.o: build/moc/moc_replayscreen.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_replayscreen.o build/moc/moc_replayscreen.cpp
 
 ####### Install
 
@@ -6289,4 +6325,11 @@ uninstall: uninstall_target  FORCE
 FORCE:
 
 .SUFFIXES:
+
+.PHONY: build run
+
+build: first
+
+run: build
+	./cpp_lib_reply
 

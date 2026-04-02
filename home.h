@@ -10,9 +10,11 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QStatusBar>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <vector>
 #include "eventview.h"
 #include "parametrview.h"
 #include "trajectoryview.h"
@@ -39,6 +41,7 @@ private slots:
     void onPrintEventView();
     void onPrintTrajectoryView();
     void onEventRowClicked(int row);
+    void onTubeSelectionTriggered(QAction *action);
 
 private:
     // Central widget and main layout
@@ -51,6 +54,7 @@ private:
     QMenu *menuView;
     QMenu *menuPrint;
     QMenu *menuParser;
+    QMenu *menuTubeSelection;
     
     // Menu actions
     QAction *actionFileOpen;
@@ -64,6 +68,7 @@ private:
     QAction *actionPrintParameterView;
     QAction *actionPrintEventView;
     QAction *actionPrintTrajectoryView;
+    QActionGroup *tubeSelectionActionGroup;
     
     // Status bar
     QStatusBar *statusBar;
@@ -82,11 +87,20 @@ private:
     QGraphicsScene *trajectoryScene;
     
     QString currentDatFilePath;
+    int submarineTubeCount;
+    std::size_t selectedTubeIndex;
+    bool hasTubeSelection;
+    std::vector<std::vector<std::size_t>> tubeTargetIndexPools;
+    std::vector<QStringList> tubeTargetLabelPools;
     
     void setupUI();
     void setupMenuBar();
     void setupViewStack();
     void setupHomeWidget();
+    void setupTubeSelectionMenu(int tubeCount);
+    void setTubeSelectionMenuVisible(bool visible);
+    void setupTubeTargetPools();
+    void applyTargetsForSelectedTube();
     void initTrajectoryPlot();
     void populateDummyData();
     void switchToParameterView();

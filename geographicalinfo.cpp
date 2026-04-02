@@ -5,6 +5,40 @@
 #include <QVBoxLayout>
 #include <QTableWidget>
 #include <qaction.h>
+#include <QSignalBlocker>
+#include <cmath>
+
+namespace {
+
+constexpr float kPi = 3.14159265358979323846f;
+
+float normalizeBearing(float bearingDeg)
+{
+    while (bearingDeg < 0.0f) {
+        bearingDeg += 360.0f;
+    }
+    while (bearingDeg >= 360.0f) {
+        bearingDeg -= 360.0f;
+    }
+    return bearingDeg;
+}
+
+float calculateBearing(float fromX, float fromY, float toX, float toY)
+{
+    const float dx = toX - fromX;
+    const float dy = toY - fromY;
+    const float rad = std::atan2(dx, dy);
+    return normalizeBearing(rad * (180.0f / kPi));
+}
+
+float calculateRange(float fromX, float fromY, float toX, float toY)
+{
+    const float dx = toX - fromX;
+    const float dy = toY - fromY;
+    return std::sqrt((dx * dx) + (dy * dy));
+}
+
+} // namespace
 
 GeographicalInfo::GeographicalInfo(QWidget *parent)
     : QWidget(parent)
@@ -75,9 +109,33 @@ void GeographicalInfo::setupTable()
         geoTable->setItem(i, 0, labelItem);
         
         QTableWidgetItem *valueItem = new QTableWidgetItem("--");
-        valueItem->setFlags(valueItem->flags() & ~Qt::ItemIsEditable);
+        if (i == ROW_CURRENT_TIME) {
+            valueItem->setFlags(valueItem->flags() | Qt::ItemIsEditable);
+        } else {
+            valueItem->setFlags(valueItem->flags() & ~Qt::ItemIsEditable);
+        }
         geoTable->setItem(i, 1, valueItem);
     }
+
+    connect(geoTable, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *item) {
+        if (!item || item->row() != ROW_CURRENT_TIME || item->column() != 1) {
+            return;
+        }
+
+        QString text = item->text().trimmed();
+        text.replace("s", "", Qt::CaseInsensitive);
+        text = text.trimmed();
+
+        bool ok = false;
+        const float currentTime = text.toFloat(&ok);
+        if (!ok) {
+            return;
+        }
+
+        const QSignalBlocker blocker(geoTable);
+        item->setText(QString::number(currentTime, 'f', 2) + " s");
+        emit dataChanged();
+    });
     
     mainLayout->addWidget(geoTable);
 }
@@ -145,11 +203,45 @@ void GeographicalInfo::updateGeoData(const GeoData& data)
     setTorpedoTargetRange(data.torpedoTargetRange);
 }
 
+void GeographicalInfo::updateGeoDataFromPositions(float currentTime,
+                                                  float ownshipX, float ownshipY,
+                                                  float targetX, float targetY,
+                                                  float torpedoX, float torpedoY)
+{
+    GeoData data;
+    data.currentTime = currentTime;
+    data.ownshipTorpedoBearing = calculateBearing(ownshipX, ownshipY, torpedoX, torpedoY);
+    data.ownshipTorpedoRange = calculateRange(ownshipX, ownshipY, torpedoX, torpedoY);
+    data.ownshipTargetBearing = calculateBearing(ownshipX, ownshipY, targetX, targetY);
+    data.ownshipTargetRange = calculateRange(ownshipX, ownshipY, targetX, targetY);
+    data.torpedoTargetBearing = calculateBearing(torpedoX, torpedoY, targetX, targetY);
+    data.torpedoTargetRange = calculateRange(torpedoX, torpedoY, targetX, targetY);
+    updateGeoData(data);
+}
+
+void GeographicalInfo::updateGeoDataFromSample(float currentTime,
+                                               float targetX, float targetY,
+                                               float torpedoX, float torpedoY,
+                                               float ownshipX, float ownshipY)
+{
+    updateGeoDataFromPositions(currentTime,
+                               ownshipX, ownshipY,
+                               targetX, targetY,
+                               torpedoX, torpedoY);
+}
+
 void GeographicalInfo::clearData()
 {
-    for (int i = 0; i < geoTable->rowCount(); ++i) {
-        updateValue(i, "--");
-    }
+    // Show deterministic dummy values until real trajectory data is loaded.
+    GeoData dummy;
+    dummy.currentTime = 0.0f;
+    dummy.ownshipTorpedoBearing = 186.0f;
+    dummy.ownshipTorpedoRange = 1000.0f;
+    dummy.ownshipTargetBearing = 194.0f;
+    dummy.ownshipTargetRange = 1460.0f;
+    dummy.torpedoTargetBearing = 202.0f;
+    dummy.torpedoTargetRange = 1320.0f;
+    updateGeoData(dummy);
     emit dataChanged();
 }
 

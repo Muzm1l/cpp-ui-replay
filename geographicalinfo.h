@@ -45,6 +45,14 @@ public:
     };
     
     void updateGeoData(const GeoData& data);
+    void updateGeoDataFromPositions(float currentTime,
+                                    float ownshipX, float ownshipY,
+                                    float targetX, float targetY,
+                                    float torpedoX, float torpedoY);
+    void updateGeoDataFromSample(float currentTime,
+                                 float targetX, float targetY,
+                                 float torpedoX, float torpedoY,
+                                 float ownshipX = 0.0f, float ownshipY = 0.0f);
     void clearData();
     
     // Customization options

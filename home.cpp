@@ -14,16 +14,57 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QAction>
+#include <QActionGroup>
 #include <QStackedWidget>
 #include <QGraphicsScene>
 #include <QBrush>
 #include <QFileInfo>
+#include <QDir>
+
+namespace {
+constexpr int kDefaultSubmarineTubeCount = 4;
+constexpr int kTargetsPerTube = 3;
+
+QString resolveScenarioOutputPath() {
+    QDir probe(QDir::currentPath());
+    for (int depth = 0; depth < 6; ++depth) {
+        if (probe.exists("sample_data")) {
+            return probe.filePath("sample_data/output.csv");
+        }
+        if (!probe.cdUp()) {
+            break;
+        }
+    }
+
+    QDir fallback(QDir::currentPath());
+    fallback.mkpath("sample_data");
+    return fallback.filePath("sample_data/output.csv");
+}
+}
 
 Home::Home(QWidget *parent)
     : QMainWindow(parent)
     , centralWidget(nullptr)
     , viewStack(nullptr)
     , menuBar(nullptr)
+    , menuFile(nullptr)
+    , menuView(nullptr)
+    , menuPrint(nullptr)
+    , menuParser(nullptr)
+    , menuTubeSelection(nullptr)
+    , actionFileOpen(nullptr)
+    , actionFileClose(nullptr)
+    , actionGenerateSimulator(nullptr)
+    , actionFileParser(nullptr)
+    , actionFileExit(nullptr)
+    , actionViewParameter(nullptr)
+    , actionViewEvent(nullptr)
+    , actionViewTrajectory(nullptr)
+    , actionPrintParameterView(nullptr)
+    , actionPrintEventView(nullptr)
+    , actionPrintTrajectoryView(nullptr)
+    , tubeSelectionActionGroup(nullptr)
+    , statusBar(nullptr)
     , parameterView(nullptr)
     , eventView(nullptr)
     , trajectoryView(nullptr)
@@ -33,12 +74,17 @@ Home::Home(QWidget *parent)
     , tablePlot(nullptr)
     , geoInfo(nullptr)
     , trajectoryScene(nullptr)
+    , submarineTubeCount(kDefaultSubmarineTubeCount)
+    , selectedTubeIndex(0)
+    , hasTubeSelection(false)
 {
     // Setup the window
     setWindowTitle("Home");
     setObjectName("homeWindow");
     // Create main UI
     setupUI();
+
+    setupTubeTargetPools();
     
     // Setup view stack for content switching
     setupViewStack();
@@ -134,6 +180,49 @@ void Home::setupMenuBar()
     
     actionFileParser = menuParser->addAction("Parser");
     actionFileParser->setShortcut(Qt::CTRL | Qt::Key_P);
+
+    // Tube Selection Menu (visible only in Trajectory view)
+    menuTubeSelection = menuBar->addMenu("Tube Selection");
+    setupTubeSelectionMenu(submarineTubeCount);
+    setTubeSelectionMenuVisible(false);
+}
+
+void Home::setupTubeSelectionMenu(int tubeCount)
+{
+    if (!menuTubeSelection) {
+        return;
+    }
+
+    menuTubeSelection->clear();
+    if (!tubeSelectionActionGroup) {
+        tubeSelectionActionGroup = new QActionGroup(this);
+        tubeSelectionActionGroup->setExclusive(true);
+        connect(tubeSelectionActionGroup, &QActionGroup::triggered, this, &Home::onTubeSelectionTriggered);
+    }
+
+    QAction *noneAction = menuTubeSelection->addAction("None");
+    noneAction->setCheckable(true);
+    noneAction->setData(-1);
+    noneAction->setChecked(true);
+    tubeSelectionActionGroup->addAction(noneAction);
+
+    menuTubeSelection->addSeparator();
+
+    const int safeTubeCount = qMax(1, tubeCount);
+    for (int tubeIndex = 1; tubeIndex <= safeTubeCount; ++tubeIndex) {
+        QAction *tubeAction = menuTubeSelection->addAction(QString("Tube %1").arg(tubeIndex));
+        tubeAction->setCheckable(true);
+        tubeAction->setData(tubeIndex - 1);
+        tubeSelectionActionGroup->addAction(tubeAction);
+    }
+}
+
+void Home::setTubeSelectionMenuVisible(bool visible)
+{
+    if (!menuTubeSelection) {
+        return;
+    }
+    menuTubeSelection->menuAction()->setVisible(visible);
 }
 
 void Home::setupViewStack()
@@ -155,6 +244,11 @@ void Home::setupViewStack()
     
     // Create and add trajectory view
     trajectoryView = new TrajectoryView(this);
+    trajectoryView->setTargetCount(static_cast<std::size_t>(submarineTubeCount * kTargetsPerTube));
+    trajectoryView->setAvailableTargetsForTube({}, {});
+    trajectoryView->setSimulatorDataReady(false);
+    trajectoryView->setTubeSelectionConfirmed(false);
+    trajectoryView->clearGraph();
     viewStack->addWidget(trajectoryView);       // Index 3: Trajectory view
     
     // Set the stacked widget as the central widget
@@ -162,6 +256,7 @@ void Home::setupViewStack()
     
     // Show home view by default
     viewStack->setCurrentIndex(0);
+    setTubeSelectionMenuVisible(false);
 }
 
 
@@ -213,22 +308,28 @@ void Home::onFileClose()
 
 void Home::onGenerateSimulator()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save Scenario"), "",
-        tr("CSV Files (*.csv);;All Files (*)"));
+    const QString fileName = resolveScenarioOutputPath();
 
-    if (fileName.isEmpty()) {
-        return;
-    }
-
-    if (Simulator::generateSimulatorCsv(fileName.toStdString())) {
+    if (Simulator::generateScenarioCsv(fileName.toStdString())) {
+        if (trajectoryView) {
+            trajectoryView->setSimulatorDataReady(true);
+            if (hasTubeSelection) {
+                applyTargetsForSelectedTube();
+                trajectoryView->setTubeSelectionConfirmed(true);
+            } else {
+                trajectoryView->setAvailableTargetsForTube({}, {});
+                trajectoryView->setTubeSelectionConfirmed(false);
+            }
+            trajectoryView->clearGraph();
+        }
         QMessageBox::information(this, tr("Success"),
-                                 tr("Scenario data generated successfully."));
-        trajectoryView->loadTrajectoryData(fileName);
+                                 tr("Scenario data generated at %1. Now select Tube and Target to display trajectory.")
+                                     .arg(QDir::toNativeSeparators(fileName)));
         switchToTrajectoryView();
     } else {
         QMessageBox::critical(this, tr("Error"),
-                                tr("Failed to generate scenario data."));
+                                tr("Failed to generate scenario data at %1.")
+                                    .arg(QDir::toNativeSeparators(fileName)));
     }
 }
 
@@ -285,6 +386,7 @@ void Home::switchToParameterView()
 {
     if (viewStack) {
         viewStack->setCurrentIndex(1);
+        setTubeSelectionMenuVisible(false);
         qDebug() << "Switched to Parameter view (index 1)";
     }
 }
@@ -293,6 +395,7 @@ void Home::switchToEventView()
 {
     if (viewStack) {
         viewStack->setCurrentIndex(2);
+        setTubeSelectionMenuVisible(false);
         qDebug() << "Switched to Event view (index 2)";
     }
 }
@@ -301,7 +404,91 @@ void Home::switchToTrajectoryView()
 {
     if (viewStack) {
         viewStack->setCurrentIndex(3);
+        setTubeSelectionMenuVisible(true);
+        if (trajectoryView) {
+            trajectoryView->setTargetCount(static_cast<std::size_t>(submarineTubeCount * kTargetsPerTube));
+            if (hasTubeSelection) {
+                applyTargetsForSelectedTube();
+                trajectoryView->setTubeSelectionConfirmed(true);
+                trajectoryView->replaySimulation();
+            } else {
+                trajectoryView->setAvailableTargetsForTube({}, {});
+                trajectoryView->setTubeSelectionConfirmed(false);
+                trajectoryView->clearGraph();
+            }
+        }
         qDebug() << "Switched to Trajectory view (index 3)";
+    }
+}
+
+void Home::onTubeSelectionTriggered(QAction *action)
+{
+    if (!action) {
+        return;
+    }
+
+    bool ok = false;
+    const int tubeIndex = action->data().toInt(&ok);
+    if (!ok) {
+        return;
+    }
+
+    if (tubeIndex < 0) {
+        hasTubeSelection = false;
+        if (trajectoryView) {
+            trajectoryView->setAvailableTargetsForTube({}, {});
+            trajectoryView->setTubeSelectionConfirmed(false);
+            trajectoryView->clearGraph();
+        }
+        return;
+    }
+
+    selectedTubeIndex = static_cast<std::size_t>(tubeIndex);
+    hasTubeSelection = true;
+    if (trajectoryView) {
+        applyTargetsForSelectedTube();
+        trajectoryView->setTubeSelectionConfirmed(true);
+        trajectoryView->replaySimulation();
+    }
+}
+
+void Home::setupTubeTargetPools()
+{
+    tubeTargetIndexPools.clear();
+    tubeTargetLabelPools.clear();
+
+    const int safeTubeCount = qMax(1, submarineTubeCount);
+    std::size_t globalIndex = 0;
+
+    for (int tube = 0; tube < safeTubeCount; ++tube) {
+        std::vector<std::size_t> indices;
+        QStringList labels;
+        indices.reserve(kTargetsPerTube);
+        for (int t = 0; t < kTargetsPerTube; ++t) {
+            indices.push_back(globalIndex);
+            const int uniqueDisplayId = ((tube + 1) * 1000) + ((t + 1) * 37);
+            labels << QString::number(uniqueDisplayId);
+            ++globalIndex;
+        }
+        tubeTargetIndexPools.push_back(indices);
+        tubeTargetLabelPools.push_back(labels);
+    }
+}
+
+void Home::applyTargetsForSelectedTube()
+{
+    if (!trajectoryView) {
+        return;
+    }
+
+    if (tubeTargetIndexPools.empty() || selectedTubeIndex >= tubeTargetIndexPools.size()) {
+        return;
+    }
+
+    trajectoryView->setAvailableTargetsForTube(tubeTargetIndexPools[selectedTubeIndex],
+                                               tubeTargetLabelPools[selectedTubeIndex]);
+    if (!tubeTargetIndexPools[selectedTubeIndex].empty()) {
+        trajectoryView->setSelectedTargetIndex(tubeTargetIndexPools[selectedTubeIndex].front());
     }
 }
 
