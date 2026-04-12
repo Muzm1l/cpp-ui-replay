@@ -59,6 +59,7 @@ SOURCES       = main.cpp \
 		eventview.cpp \
 		parametrview.cpp \
 		trajectoryview.cpp \
+		scaleview.cpp \
 		geographicalinfo.cpp \
 		acousticpanorama.cpp \
 		demongraph.cpp \
@@ -70,6 +71,7 @@ SOURCES       = main.cpp \
 		build/moc/moc_eventview.cpp \
 		build/moc/moc_parametrview.cpp \
 		build/moc/moc_trajectoryview.cpp \
+		build/moc/moc_scaleview.cpp \
 		build/moc/moc_geographicalinfo.cpp \
 		build/moc/moc_acousticpanorama.cpp \
 		build/moc/moc_demongraph.cpp \
@@ -83,6 +85,7 @@ OBJECTS       = build/obj/main.o \
 		build/obj/eventview.o \
 		build/obj/parametrview.o \
 		build/obj/trajectoryview.o \
+		build/obj/scaleview.o \
 		build/obj/geographicalinfo.o \
 		build/obj/acousticpanorama.o \
 		build/obj/demongraph.o \
@@ -95,6 +98,7 @@ OBJECTS       = build/obj/main.o \
 		build/obj/moc_eventview.o \
 		build/obj/moc_parametrview.o \
 		build/obj/moc_trajectoryview.o \
+		build/obj/moc_scaleview.o \
 		build/obj/moc_geographicalinfo.o \
 		build/obj/moc_acousticpanorama.o \
 		build/obj/moc_demongraph.o \
@@ -347,6 +351,7 @@ DIST          = README.md \
 		eventview.h \
 		parametrview.h \
 		trajectoryview.h \
+		scaleview.h \
 		geographicalinfo.h \
 		acousticpanorama.h \
 		demongraph.h \
@@ -360,6 +365,7 @@ DIST          = README.md \
 		eventview.cpp \
 		parametrview.cpp \
 		trajectoryview.cpp \
+		scaleview.cpp \
 		geographicalinfo.cpp \
 		acousticpanorama.cpp \
 		demongraph.cpp \
@@ -875,8 +881,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents ../Qt/6.10.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h replayscreen.h simulator.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp replayscreen.cpp simulator.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents parser.h parser_format_config.h parserdialog.h home.h eventview.h parametrview.h trajectoryview.h scaleview.h geographicalinfo.h acousticpanorama.h demongraph.h parameterinfotree.h trajectorytable.h replayscreen.h simulator.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp home.cpp parser.cpp parserdialog.cpp eventview.cpp parametrview.cpp trajectoryview.cpp scaleview.cpp geographicalinfo.cpp acousticpanorama.cpp demongraph.cpp trajectorytable.cpp parameterinfotree.cpp replayscreen.cpp simulator.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -914,9 +920,9 @@ compiler_moc_predefs_clean:
 build/moc/moc_predefs.h: ../Qt/6.10.1/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -fPIC -dM -E -o build/moc/moc_predefs.h ../Qt/6.10.1/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replayscreen.cpp
+compiler_moc_header_make_all: build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_scaleview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replayscreen.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replayscreen.cpp
+	-$(DEL_FILE) build/moc/moc_home.cpp build/moc/moc_eventview.cpp build/moc/moc_parametrview.cpp build/moc/moc_trajectoryview.cpp build/moc/moc_scaleview.cpp build/moc/moc_geographicalinfo.cpp build/moc/moc_acousticpanorama.cpp build/moc/moc_demongraph.cpp build/moc/moc_parameterinfotree.cpp build/moc/moc_trajectorytable.cpp build/moc/moc_replayscreen.cpp
 build/moc/moc_home.cpp: home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QMainWindow \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qmainwindow.h \
@@ -1171,7 +1177,14 @@ build/moc/moc_home.cpp: home.h \
 		parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSlider \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsRectItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
@@ -1180,10 +1193,13 @@ build/moc/moc_home.cpp: home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreeview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
+		scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
 		trajectoryview.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsTextItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
@@ -1191,11 +1207,6 @@ build/moc/moc_home.cpp: home.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
 		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		trajectorytable.h \
-		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
-		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
-		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
 		simulator.h \
 		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
@@ -1670,7 +1681,14 @@ build/moc/moc_parametrview.cpp: parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollarea.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsscene.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsRectItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
@@ -1679,6 +1697,12 @@ build/moc/moc_parametrview.cpp: parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreeview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
+		scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
 		build/moc/moc_predefs.h \
 		../Qt/6.10.1/gcc_64/libexec/moc
 	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include parametrview.h -o build/moc/moc_parametrview.cpp
@@ -1934,11 +1958,9 @@ build/moc/moc_trajectoryview.cpp: trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
+		simulator.h \
 		acousticpanorama.h \
 		demongraph.h \
-		simulator.h \
 		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
@@ -1946,6 +1968,216 @@ build/moc/moc_trajectoryview.cpp: trajectoryview.h \
 		build/moc/moc_predefs.h \
 		../Qt/6.10.1/gcc_64/libexec/moc
 	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectoryview.h -o build/moc/moc_trajectoryview.cpp
+
+build/moc/moc_scaleview.cpp: scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QWidget \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qwidget.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtguiglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtcoreglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtversionchecks.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtconfiginclude.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qconfig.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtcore-config.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtconfigmacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtdeprecationdefinitions.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qprocessordetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsystemdetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtcoreexports.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtdeprecationmarkers.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtclasshelpermacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtpreprocessorsupport.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qassert.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtnoop.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtypes.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtversion.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtypeinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsysinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlogging.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qflags.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcompare_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qatomic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbasicatomic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qgenericatomic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qyieldcpu.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qconstructormacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdarwinhelpers.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qexceptionhandling.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qforeach.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qttypetraits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfunctionpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qglobalstatic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmalloc.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qminmax.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qnumeric.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20type_traits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qoverload.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qswap.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtenvironmentvariables.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtresource.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qttranslation.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qversiontagging.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtgui-config.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtguiexports.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgetsexports.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qwindowdefs.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobjectdefs.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qnamespace.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcompare.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstdlibdetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcomparehelpers.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtmetamacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfunctionaltools_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobject.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstring.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qchar.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearray.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qrefcount.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qarraydata.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qpair.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qarraydatapointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qarraydataops.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qxptype_traits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20functional.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20memory.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q17memory.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearrayalgorithms.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearrayview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringfwd.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlatin1stringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qanystringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qutf8stringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringtokenizer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q23type_traits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringbuilder.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringconverter.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringconverter_base.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlist.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qhashfunctions.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiterator.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearraylist.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlist.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qalgorithms.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringmatcher.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcoreevent.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qabstracteventdispatcher.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qeventloop.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdeadlinetimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmetatype.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatastream.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiodevicebase.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qscopedpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfloat16.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmath.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtformat_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiterable.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtaggedpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmetacontainer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontainerinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qscopeguard.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobject_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbindingstorage.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmargins.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcheckedint_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q23utility.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20utility.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qaction.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qkeysequence.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qicon.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsize.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpixmap.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpaintdevice.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qrect.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qpoint.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qcolor.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qrgb.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qrgba64.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qshareddata.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qimage.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpixelformat.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtransform.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpolygon.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qregion.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qspan.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20iterator.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qline.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvariant.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdebug.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtextstream.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsharedpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmap.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qshareddata_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qset.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qhash.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qalloc.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpalette.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qbrush.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfont.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qendian.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfontmetrics.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfontinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfontvariableaxis.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qsizepolicy.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qcursor.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qbitmap.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qevent.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiodevice.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qurl.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qeventpoint.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qvector2d.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qvectornd.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpointingdevice.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qinputdevice.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qscreen.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QObject \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRect \
+		../Qt/6.10.1/gcc_64/include/QtCore/QSize \
+		../Qt/6.10.1/gcc_64/include/QtCore/QSizeF \
+		../Qt/6.10.1/gcc_64/include/QtGui/QTransform \
+		../Qt/6.10.1/gcc_64/include/QtCore/qnativeinterface.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qscreen_platform.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qguiapplication.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcoreapplication.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcoreapplication_platform.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfuture.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfutureinterface.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmutex.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtsan_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qresultstore.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfuture_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qthreadpool.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qthread.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qrunnable.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qexception.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qpromise.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qinputmethod.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlocale.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qguiapplication_platform.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
+		build/moc/moc_predefs.h \
+		../Qt/6.10.1/gcc_64/libexec/moc
+	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include scaleview.h -o build/moc/moc_scaleview.cpp
 
 build/moc/moc_geographicalinfo.cpp: geographicalinfo.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QWidget \
@@ -3065,8 +3297,7 @@ build/moc/moc_trajectorytable.cpp: trajectorytable.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
+		simulator.h \
 		build/moc/moc_predefs.h \
 		../Qt/6.10.1/gcc_64/libexec/moc
 	/home/siddartha/Qt/6.10.1/gcc_64/libexec/moc $(DEFINES) --include /home/siddartha/FiringAnalysis/build/moc/moc_predefs.h -I/home/siddartha/Qt/6.10.1/gcc_64/mkspecs/linux-g++ -I/home/siddartha/FiringAnalysis -I/home/siddartha/Qt/6.10.1/gcc_64/include -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtWidgets -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtGui -I/home/siddartha/Qt/6.10.1/gcc_64/include/QtCore -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include trajectorytable.h -o build/moc/moc_trajectorytable.cpp
@@ -3544,7 +3775,14 @@ build/obj/main.o: main.cpp home.h \
 		parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSlider \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsRectItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
@@ -3553,10 +3791,13 @@ build/obj/main.o: main.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreeview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
+		scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
 		trajectoryview.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsTextItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
@@ -3564,11 +3805,6 @@ build/obj/main.o: main.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
 		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		trajectorytable.h \
-		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
-		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
-		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
 		simulator.h \
 		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
@@ -3838,7 +4074,14 @@ build/obj/home.o: home.cpp home.h \
 		parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSlider \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsRectItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
@@ -3847,10 +4090,13 @@ build/obj/home.o: home.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreeview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
+		scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
 		trajectoryview.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
-		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsTextItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
@@ -3858,11 +4104,6 @@ build/obj/home.o: home.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringListModel \
 		../Qt/6.10.1/gcc_64/include/QtCore/qstringlistmodel.h \
 		trajectorytable.h \
-		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
-		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
-		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
 		simulator.h \
 		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
@@ -3880,8 +4121,6 @@ build/obj/home.o: home.cpp home.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qdir.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qdirlisting.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qfiledevice.h \
-		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
-		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qfile.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qfileinfo.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimezone.h \
@@ -4616,7 +4855,14 @@ build/obj/parametrview.o: parametrview.cpp parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollarea.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsscene.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsLineItem \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsitem.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainterpath.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsRectItem \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
 		acousticpanorama.h \
 		demongraph.h \
 		geographicalinfo.h \
@@ -4625,8 +4871,18 @@ build/obj/parametrview.o: parametrview.cpp parametrview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidget.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreeview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
+		scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHeaderView \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qheaderview.h
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qheaderview.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/QResizeEvent \
+		../Qt/6.10.1/gcc_64/include/QtGui/QPen \
+		../Qt/6.10.1/gcc_64/include/QtGui/QBrush \
+		../Qt/6.10.1/gcc_64/include/QtCore/QtMath
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/parametrview.o parametrview.cpp
 
 build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
@@ -4880,11 +5136,9 @@ build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
+		simulator.h \
 		acousticpanorama.h \
 		demongraph.h \
-		simulator.h \
 		replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
 		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
@@ -4905,6 +5159,222 @@ build/obj/trajectoryview.o: trajectoryview.cpp trajectoryview.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QRandomGenerator \
 		../Qt/6.10.1/gcc_64/include/QtCore/qrandom.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/trajectoryview.o trajectoryview.cpp
+
+build/obj/scaleview.o: scaleview.cpp scaleview.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QWidget \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qwidget.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtguiglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtcoreglobal.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtversionchecks.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtconfiginclude.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qconfig.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtcore-config.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtconfigmacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtdeprecationdefinitions.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qprocessordetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsystemdetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtcoreexports.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtdeprecationmarkers.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtclasshelpermacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtpreprocessorsupport.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qassert.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtnoop.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtypes.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtversion.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtypeinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsysinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlogging.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qflags.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcompare_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qatomic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbasicatomic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qgenericatomic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qyieldcpu.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qconstructormacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdarwinhelpers.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qexceptionhandling.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qforeach.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qttypetraits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfunctionpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qglobalstatic.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmalloc.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qminmax.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qnumeric.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20type_traits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qoverload.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qswap.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtenvironmentvariables.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtresource.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qttranslation.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qversiontagging.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtgui-config.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtguiexports.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qtwidgetsexports.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qwindowdefs.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobjectdefs.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qnamespace.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcompare.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstdlibdetection.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcomparehelpers.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtmetamacros.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfunctionaltools_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobject.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstring.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qchar.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearray.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qrefcount.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qarraydata.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qpair.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qarraydatapointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qarraydataops.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qxptype_traits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20functional.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20memory.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q17memory.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearrayalgorithms.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearrayview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringfwd.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlatin1stringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qanystringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qutf8stringview.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringtokenizer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q23type_traits.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringbuilder.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringconverter.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringconverter_base.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlist.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qhashfunctions.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiterator.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbytearraylist.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringlist.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qalgorithms.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qstringmatcher.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcoreevent.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qabstracteventdispatcher.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qeventloop.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdeadlinetimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmetatype.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatastream.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiodevicebase.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qscopedpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfloat16.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmath.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtformat_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiterable.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtaggedpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmetacontainer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontainerinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qscopeguard.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qobject_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qbindingstorage.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmargins.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcheckedint_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q23utility.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20utility.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qaction.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qkeysequence.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qicon.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsize.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpixmap.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpaintdevice.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qrect.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qpoint.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qcolor.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qrgb.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qrgba64.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qshareddata.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qimage.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpixelformat.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtransform.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpolygon.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qregion.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qspan.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/q20iterator.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qline.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvariant.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdebug.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtextstream.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsharedpointer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmap.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qshareddata_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qset.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qhash.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qalloc.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpalette.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qbrush.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfont.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qendian.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfontmetrics.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfontinfo.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qfontvariableaxis.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qsizepolicy.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qcursor.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qbitmap.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qevent.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qiodevice.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qurl.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qeventpoint.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qvector2d.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qvectornd.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpointingdevice.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qinputdevice.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qscreen.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QObject \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRect \
+		../Qt/6.10.1/gcc_64/include/QtCore/QSize \
+		../Qt/6.10.1/gcc_64/include/QtCore/QSizeF \
+		../Qt/6.10.1/gcc_64/include/QtGui/QTransform \
+		../Qt/6.10.1/gcc_64/include/QtCore/qnativeinterface.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qscreen_platform.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qguiapplication.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcoreapplication.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcoreapplication_platform.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfuture.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfutureinterface.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qmutex.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtsan_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qresultstore.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qfuture_impl.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qthreadpool.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qthread.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qrunnable.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qexception.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qpromise.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qinputmethod.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qlocale.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qguiapplication_platform.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTime \
+		../Qt/6.10.1/gcc_64/include/QtCore/qdatetime.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/qcalendar.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
+		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
+		../Qt/6.10.1/gcc_64/include/QtCore/QPoint \
+		../Qt/6.10.1/gcc_64/include/QtCore/QRectF \
+		../Qt/6.10.1/gcc_64/include/QtGui/QMouseEvent \
+		../Qt/6.10.1/gcc_64/include/QtGui/QFontMetrics \
+		../Qt/6.10.1/gcc_64/include/QtGui/QPaintEvent \
+		../Qt/6.10.1/gcc_64/include/QtGui/QPainter \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpainter.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtextoption.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpen.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QtMath
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/scaleview.o scaleview.cpp
 
 build/obj/geographicalinfo.o: geographicalinfo.cpp geographicalinfo.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QWidget \
@@ -5804,8 +6274,7 @@ build/obj/trajectorytable.o: trajectorytable.cpp trajectorytable.h \
 		../Qt/6.10.1/gcc_64/include/QtCore/QStringList \
 		../Qt/6.10.1/gcc_64/include/QtCore/QVector \
 		../Qt/6.10.1/gcc_64/include/QtCore/qvector.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/QScrollBar \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollbar.h \
+		simulator.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QHeaderView \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qheaderview.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QSizePolicy \
@@ -5818,7 +6287,9 @@ build/obj/trajectorytable.o: trajectorytable.cpp trajectorytable.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
-		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h
+		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QtMath \
+		../Qt/6.10.1/gcc_64/include/QtCore/QEvent
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/trajectorytable.o trajectorytable.cpp
 
 build/obj/parameterinfotree.o: parameterinfotree.cpp parameterinfotree.h \
@@ -6247,6 +6718,12 @@ build/obj/replayscreen.o: replayscreen.cpp replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qlayout.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qlayoutitem.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgridlayout.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QHBoxLayout \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/QLabel \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qlabel.h \
+		../Qt/6.10.1/gcc_64/include/QtWidgets/qframe.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qpicture.h \
+		../Qt/6.10.1/gcc_64/include/QtGui/qtextdocument.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsView \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsview.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/qpainter.h \
@@ -6254,7 +6731,6 @@ build/obj/replayscreen.o: replayscreen.cpp replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/qpen.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qscrollarea.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../Qt/6.10.1/gcc_64/include/QtWidgets/qframe.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qgraphicsscene.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsScene \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QGraphicsTextItem \
@@ -6265,9 +6741,12 @@ build/obj/replayscreen.o: replayscreen.cpp replayscreen.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/QPushButton \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		../Qt/6.10.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		../Qt/6.10.1/gcc_64/include/QtCore/QTimer \
+		../Qt/6.10.1/gcc_64/include/QtCore/qtimer.h \
 		../Qt/6.10.1/gcc_64/include/QtGui/QPen \
 		../Qt/6.10.1/gcc_64/include/QtGui/QBrush \
 		../Qt/6.10.1/gcc_64/include/QtGui/QColor \
+		../Qt/6.10.1/gcc_64/include/QtGui/QFont \
 		../Qt/6.10.1/gcc_64/include/QtCore/QtMath
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/replayscreen.o replayscreen.cpp
 
@@ -6288,6 +6767,9 @@ build/obj/moc_parametrview.o: build/moc/moc_parametrview.cpp
 
 build/obj/moc_trajectoryview.o: build/moc/moc_trajectoryview.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_trajectoryview.o build/moc/moc_trajectoryview.cpp
+
+build/obj/moc_scaleview.o: build/moc/moc_scaleview.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_scaleview.o build/moc/moc_scaleview.cpp
 
 build/obj/moc_geographicalinfo.o: build/moc/moc_geographicalinfo.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/obj/moc_geographicalinfo.o build/moc/moc_geographicalinfo.cpp
@@ -6325,11 +6807,4 @@ uninstall: uninstall_target  FORCE
 FORCE:
 
 .SUFFIXES:
-
-.PHONY: build run
-
-build: first
-
-run: build
-	./cpp_lib_reply
 

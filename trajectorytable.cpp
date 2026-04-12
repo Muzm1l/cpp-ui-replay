@@ -5,8 +5,36 @@
 #include <QColor>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QScrollBar>
 #include <QTimer>
+#include <QStringList>
+#include <QtMath>
+#include <QEvent>
+
+namespace {
+
+double normalizeBearingDeg(double angleDeg)
+{
+    double normalized = std::fmod(angleDeg, 360.0);
+    if (normalized < 0.0) {
+        normalized += 360.0;
+    }
+    return normalized;
+}
+
+double bearingFromOwnshipDeg(double ownX, double ownY, double targetX, double targetY)
+{
+    const double dx = targetX - ownX;
+    const double dy = targetY - ownY;
+    const double angle = qRadiansToDegrees(std::atan2(dx, dy));
+    return normalizeBearingDeg(angle);
+}
+
+QString fmt1(double value)
+{
+    return QString::number(value, 'f', 1);
+}
+
+} // namespace
 
 TableColumn::TableColumn(const QString &headerName)
     : m_headerName(headerName)
@@ -105,47 +133,43 @@ TrajectoryTable::TrajectoryTable(QWidget *parent)
 
     mainLayout->addLayout(tablesLayout, 1);
 
-    // Split previous 4 columns into 4 independent single-column tables.
-    m_columnTables.append(createColumnTable("Date", QStringList() << "Date" << "Time", false, 4, 1));
-    m_columnTables.append(createColumnTable("Ownship", QStringList() << "Heading" << "Speed" << "Depth", false, 4, 3));
-    m_columnTables.append(createColumnTable("Target", QStringList() << "Heading" << "Speed" << "Bearing", false, 4, 3));
+    const int totalVisibleRows = 7;
+    m_dateTable = createColumnTable("Date", QStringList() << "Date" << "Time", totalVisibleRows, 1);
+    m_columnTables.append(m_dateTable);
+    m_ownshipTable = createColumnTable("Ownship", QStringList() << "Heading" << "Speed" << "Depth", totalVisibleRows, 3);
+    m_columnTables.append(m_ownshipTable);
+    m_targetTable = createColumnTable("Target", QStringList() << "Heading" << "Speed" << "Bearing", totalVisibleRows, 3);
+    m_columnTables.append(m_targetTable);
 
     QTableWidget *torpedoTable = createColumnTable(
         "Torpedo",
         QStringList() << "Heading" << "Speed" << "Bearing" << "Depth" << "WG Type" << "Torpedo Phase",
-        true,
-        6,
+        totalVisibleRows,
         3
     );
     torpedoTable->setObjectName("torpedoSubTable");
     m_torpedoTable = torpedoTable;
-
-    QScrollBar *internalScrollBar = torpedoTable->verticalScrollBar();
-    internalScrollBar->setObjectName("torpedoVerticalScrollBar");
-    torpedoTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    m_torpedoExternalScrollBar = new QScrollBar(Qt::Vertical, torpedoTable);
-    m_torpedoExternalScrollBar->setObjectName("torpedoExternalScrollBar");
     m_columnTables.append(torpedoTable);
-
-    connect(internalScrollBar, &QScrollBar::rangeChanged, this,
-            [this](int, int) { syncTorpedoExternalScrollbar(); });
-    connect(internalScrollBar, &QScrollBar::valueChanged,
-            m_torpedoExternalScrollBar, &QScrollBar::setValue);
-    connect(m_torpedoExternalScrollBar, &QScrollBar::valueChanged,
-            internalScrollBar, &QScrollBar::setValue);
-    connect(torpedoTable->horizontalHeader(), &QHeaderView::geometriesChanged,
-            this, &TrajectoryTable::adjustTorpedoScrollbarGeometry);
 
     for (QTableWidget *table : m_columnTables) {
         tablesLayout->addWidget(table, 1);
+        table->installEventFilter(this);
+        table->viewport()->installEventFilter(this);
+    }
+
+    int uniformTableHeight = 0;
+    for (QTableWidget *table : m_columnTables) {
+        uniformTableHeight = qMax(uniformTableHeight, table->minimumHeight());
+    }
+    for (QTableWidget *table : m_columnTables) {
+        table->setMinimumHeight(uniformTableHeight);
+        table->setMaximumHeight(uniformTableHeight);
     }
 
     updateColumnWidths();
-    QTimer::singleShot(0, this, [this]() { syncTorpedoExternalScrollbar(); });
 }
 
-QTableWidget *TrajectoryTable::createColumnTable(const QString &header, const QStringList &rows, bool enableVerticalScroll, int totalRows, int subColumnCount) {
+QTableWidget *TrajectoryTable::createColumnTable(const QString &header, const QStringList &rows, int totalRows, int subColumnCount) {
     QTableWidget *table = new QTableWidget(this);
     table->setObjectName("trajectorySubTable");
     table->setProperty("multiColumnTable", subColumnCount > 1);
@@ -173,10 +197,10 @@ QTableWidget *TrajectoryTable::createColumnTable(const QString &header, const QS
     for (int col = 0; col < subColumnCount; ++col) {
         table->horizontalHeader()->setSectionResizeMode(col, QHeaderView::Stretch);
     }
-    table->setVerticalScrollBarPolicy(enableVerticalScroll ? Qt::ScrollBarAsNeeded : Qt::ScrollBarAlwaysOff);
+    table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    const int rowHeight = 34;
+    const int rowHeight = table->fontMetrics().height() + 1;
     for (int row = 0; row < totalRows; ++row) {
         table->setRowHeight(row, rowHeight);
         for (int col = 0; col < subColumnCount; ++col) {
@@ -184,9 +208,9 @@ QTableWidget *TrajectoryTable::createColumnTable(const QString &header, const QS
             if (col == 0 && row < rows.size()) {
                 cellText = rows[row];
             } else if (subColumnCount > 1 && col == 1) {
-                cellText = "VALUE";
+                cellText = (row < rows.size()) ? "VALUE" : "";
             } else if (subColumnCount > 2 && col == 2) {
-                cellText = "UNITS";
+                cellText = (row < rows.size()) ? "UNITS" : "";
             }
             QTableWidgetItem *item = new QTableWidgetItem(cellText);
             if (header == "Date" && col == 0) {
@@ -198,9 +222,7 @@ QTableWidget *TrajectoryTable::createColumnTable(const QString &header, const QS
         }
     }
 
-    // Show only 4 rows per table; overflow is handled by that table's own scrollbar.
-    const int maxVisibleRows = 4;
-    int tableHeight = table->horizontalHeader()->height() + (maxVisibleRows * rowHeight) + 2;
+    int tableHeight = table->horizontalHeader()->height() + (totalRows * rowHeight) + 2;
     table->setMinimumHeight(tableHeight);
     table->setMaximumHeight(tableHeight);
 
@@ -237,42 +259,93 @@ void TrajectoryTable::updateColumnWidths() {
 void TrajectoryTable::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
     updateColumnWidths();
-    adjustTorpedoScrollbarGeometry();
     if (closeButton) {
         closeButton->move(0, 0);
         closeButton->raise();
     }
 }
 
-void TrajectoryTable::adjustTorpedoScrollbarGeometry() {
-    if (!m_torpedoTable || !m_torpedoExternalScrollBar) {
-        return;
+bool TrajectoryTable::eventFilter(QObject *watched, QEvent *event)
+{
+    Q_UNUSED(watched)
+    if (event && event->type() == QEvent::Wheel) {
+        return true;
     }
-
-    const int headerHeight = m_torpedoTable->horizontalHeader()->height();
-    const int scrollBarWidth = m_torpedoExternalScrollBar->sizeHint().width();
-
-    const int x = m_torpedoTable->width() - scrollBarWidth - 1;
-    const int y = headerHeight + 1;
-    const int height = qMax(0, m_torpedoTable->height() - headerHeight - 2);
-
-    m_torpedoExternalScrollBar->setGeometry(x, y, scrollBarWidth, height);
+    return QWidget::eventFilter(watched, event);
 }
 
-void TrajectoryTable::syncTorpedoExternalScrollbar() {
-    if (!m_torpedoTable || !m_torpedoExternalScrollBar) {
+void TrajectoryTable::setCellText(QTableWidget *table, int row, int col, const QString &text)
+{
+    if (!table || row < 0 || col < 0 || row >= table->rowCount() || col >= table->columnCount()) {
         return;
     }
 
-    QScrollBar *internalScrollBar = m_torpedoTable->verticalScrollBar();
-    if (!internalScrollBar) {
+    QTableWidgetItem *item = table->item(row, col);
+    if (!item) {
+        item = new QTableWidgetItem();
+        table->setItem(row, col, item);
+    }
+    item->setText(text);
+}
+
+void TrajectoryTable::updateStampedInfo(const Simulator::Sample& sample, std::size_t stampedIndex)
+{
+    const QString timestamp = QString::fromStdString(sample.timestamp);
+    const QStringList dateTimeParts = timestamp.split(' ');
+    const QString datePart = dateTimeParts.size() > 0 ? dateTimeParts[0] : "N/A";
+    const QString timePart = dateTimeParts.size() > 1 ? dateTimeParts[1] : "N/A";
+
+    setCellText(m_dateTable, 0, 0, QString("Date: %1").arg(datePart));
+    setCellText(m_dateTable, 1, 0, QString("Time: %1").arg(timePart));
+
+    setCellText(m_ownshipTable, 0, 1, fmt1(sample.ownHeadingDeg));
+    setCellText(m_ownshipTable, 0, 2, "deg");
+    setCellText(m_ownshipTable, 1, 1, fmt1(sample.ownSpeedKnots));
+    setCellText(m_ownshipTable, 1, 2, "kn");
+    setCellText(m_ownshipTable, 2, 1, "N/A");
+    setCellText(m_ownshipTable, 2, 2, "m");
+
+    const double targetBearingDeg = bearingFromOwnshipDeg(sample.ownX, sample.ownY, sample.targetX, sample.targetY);
+    setCellText(m_targetTable, 0, 1, fmt1(sample.targetHeadingDeg));
+    setCellText(m_targetTable, 0, 2, "deg");
+    setCellText(m_targetTable, 1, 1, fmt1(sample.targetSpeedKnots));
+    setCellText(m_targetTable, 1, 2, "kn");
+    setCellText(m_targetTable, 2, 1, fmt1(targetBearingDeg));
+    setCellText(m_targetTable, 2, 2, "deg");
+
+    const bool torpedoLaunched = sample.torpedoSpeedKnots > 0.0;
+    const double torpedoBearingDeg = bearingFromOwnshipDeg(sample.ownX, sample.ownY, sample.torpedoX, sample.torpedoY);
+    const QString guidancePhase = !torpedoLaunched ? "Standby" : (stampedIndex < 90 ? "Guided" : "Terminal");
+    const QString torpedoPhase = !torpedoLaunched ? "Pre-Launch" : "In-Run";
+
+    setCellText(m_torpedoTable, 0, 1, torpedoLaunched ? fmt1(sample.torpedoHeadingDeg) : "N/A");
+    setCellText(m_torpedoTable, 0, 2, "deg");
+    setCellText(m_torpedoTable, 1, 1, torpedoLaunched ? fmt1(sample.torpedoSpeedKnots) : "0.0");
+    setCellText(m_torpedoTable, 1, 2, "kn");
+    setCellText(m_torpedoTable, 2, 1, torpedoLaunched ? fmt1(torpedoBearingDeg) : "N/A");
+    setCellText(m_torpedoTable, 2, 2, "deg");
+    setCellText(m_torpedoTable, 3, 1, "N/A");
+    setCellText(m_torpedoTable, 3, 2, "m");
+    setCellText(m_torpedoTable, 4, 1, guidancePhase);
+    setCellText(m_torpedoTable, 4, 2, "-");
+    setCellText(m_torpedoTable, 5, 1, torpedoPhase);
+    setCellText(m_torpedoTable, 5, 2, "-");
+}
+
+void TrajectoryTable::clearStampedInfo()
+{
+    if (!m_dateTable || !m_ownshipTable || !m_targetTable || !m_torpedoTable) {
         return;
     }
 
-    m_torpedoExternalScrollBar->setRange(internalScrollBar->minimum(), internalScrollBar->maximum());
-    m_torpedoExternalScrollBar->setPageStep(internalScrollBar->pageStep());
-    m_torpedoExternalScrollBar->setSingleStep(internalScrollBar->singleStep());
-    m_torpedoExternalScrollBar->setValue(internalScrollBar->value());
-    m_torpedoExternalScrollBar->setVisible(internalScrollBar->maximum() > internalScrollBar->minimum());
-    adjustTorpedoScrollbarGeometry();
+    setCellText(m_dateTable, 0, 0, "Date");
+    setCellText(m_dateTable, 1, 0, "Time");
+
+    const QList<QTableWidget*> valueTables{m_ownshipTable, m_targetTable, m_torpedoTable};
+    for (QTableWidget *table : valueTables) {
+        for (int row = 0; row < table->rowCount(); ++row) {
+            setCellText(table, row, 1, "");
+            setCellText(table, row, 2, "");
+        }
+    }
 }

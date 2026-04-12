@@ -20,9 +20,11 @@
 #include <QBrush>
 #include <QFileInfo>
 #include <QDir>
+#include <algorithm>
 
 namespace {
-constexpr int kDefaultSubmarineTubeCount = 4;
+constexpr int kDefaultSubmarineTubeCount = 3;
+constexpr int kDefaultTargetCount = 5;
 constexpr int kTargetsPerTube = 3;
 
 QString resolveScenarioOutputPath() {
@@ -92,11 +94,6 @@ Home::Home(QWidget *parent)
     // Setup home widget with trajectory view layout
     setupHomeWidget();
     
-    // Add some sample events for demonstration
-    eventView->addEvent("Sensor1", "10:30:45.123", "10:30:50.456", "10:31:00.789", "CONTACT", "Target Detected");
-    eventView->addEvent("Sensor2", "10:31:00.234", "10:31:05.567", "10:31:15.890", "ENGAGEMENT", "Firing Solution Computed");
-    eventView->addEvent("Sensor1", "10:31:15.345", "10:31:20.678", "10:31:30.001", "DETONATION", "Impact Detected");
-    
     // Connect menu actions
     connect(actionFileOpen, &QAction::triggered, this, &Home::onFileOpen);
     connect(actionFileClose, &QAction::triggered, this, &Home::onFileClose);
@@ -116,9 +113,16 @@ Home::Home(QWidget *parent)
     
     // Connect event table row click to trajectory view
     connect(eventView, &EventView::rowClicked, this, &Home::onEventRowClicked);
-    
+    connect(trajectoryView, &TrajectoryView::targetSectorChanged, this, &Home::onTargetSectorChanged);
+        
     // Set full screen mode
     showFullScreen();
+
+    // Add some sample events for demonstration
+    eventView->addEvent("Sensor1", "10:30:45.123", "10:30:50.456", "10:31:00.789", "CONTACT", "Target Detected");
+    eventView->addEvent("Sensor2", "10:31:00.234", "10:31:05.567", "10:31:15.890", "ENGAGEMENT", "Firing Solution Computed");
+    eventView->addEvent("Sensor1", "10:31:15.345", "10:31:20.678", "10:31:30.001", "DETONATION", "Impact Detected");
+
 }
 
 Home::~Home()
@@ -139,7 +143,7 @@ void Home::setupUI()
 void Home::setupMenuBar()
 {
     menuBar = new QMenuBar(this);
-    menuBar->setObjectName("mainMenuBar");
+    menuBar->setObjectName("MENUBAR_NAME");
     menuBar->setFixedHeight(32);
     setMenuBar(menuBar);
     
@@ -217,6 +221,57 @@ void Home::setupTubeSelectionMenu(int tubeCount)
     }
 }
 
+void Home::rebuildTubeSelectionMenu(bool forwardSector)
+{
+    if (!menuTubeSelection) {
+        return;
+    }
+
+    menuTubeSelection->clear();
+    if (tubeSelectionActionGroup) {
+        tubeSelectionActionGroup->deleteLater();
+        tubeSelectionActionGroup = nullptr;
+    }
+
+    tubeSelectionActionGroup = new QActionGroup(this);
+    tubeSelectionActionGroup->setExclusive(true);
+    connect(tubeSelectionActionGroup, &QActionGroup::triggered, this, &Home::onTubeSelectionTriggered);
+
+    QAction *noneAction = menuTubeSelection->addAction("None");
+    noneAction->setCheckable(true);
+    noneAction->setData(-1);
+    noneAction->setChecked(!hasTubeSelection);
+    tubeSelectionActionGroup->addAction(noneAction);
+
+    menuTubeSelection->addSeparator();
+
+    const std::vector<std::size_t> visibleTubeIndices = forwardSector
+        ? std::vector<std::size_t>{0, 1}
+        : std::vector<std::size_t>{2};
+
+    bool currentTubeIsVisible = false;
+    for (std::size_t tubeIndex : visibleTubeIndices) {
+        QAction *tubeAction = menuTubeSelection->addAction(QString("Tube %1").arg(static_cast<int>(tubeIndex) + 1));
+        tubeAction->setCheckable(true);
+        tubeAction->setData(static_cast<int>(tubeIndex));
+        const bool shouldCheck = hasTubeSelection && selectedTubeIndex == tubeIndex;
+        tubeAction->setChecked(shouldCheck);
+        tubeSelectionActionGroup->addAction(tubeAction);
+        currentTubeIsVisible = currentTubeIsVisible || shouldCheck;
+    }
+
+    if (!currentTubeIsVisible) {
+        noneAction->setChecked(true);
+        if (hasTubeSelection) {
+            hasTubeSelection = false;
+            if (trajectoryView) {
+                trajectoryView->setTubeSelectionConfirmed(false);
+                trajectoryView->clearGraph();
+            }
+        }
+    }
+}
+
 void Home::setTubeSelectionMenuVisible(bool visible)
 {
     if (!menuTubeSelection) {
@@ -244,10 +299,10 @@ void Home::setupViewStack()
     
     // Create and add trajectory view
     trajectoryView = new TrajectoryView(this);
-    trajectoryView->setTargetCount(static_cast<std::size_t>(submarineTubeCount * kTargetsPerTube));
-    trajectoryView->setAvailableTargetsForTube({}, {});
+    trajectoryView->setTargetCount(static_cast<std::size_t>(kDefaultTargetCount));
     trajectoryView->setSimulatorDataReady(false);
     trajectoryView->setTubeSelectionConfirmed(false);
+    trajectoryView->setSelectedTubeIndex(0);
     trajectoryView->clearGraph();
     viewStack->addWidget(trajectoryView);       // Index 3: Trajectory view
     
@@ -309,21 +364,19 @@ void Home::onFileClose()
 void Home::onGenerateSimulator()
 {
     const QString fileName = resolveScenarioOutputPath();
+    const std::size_t selectedTargetIndex = trajectoryView ? trajectoryView->currentSelectedTargetIndex() : 0;
+    const std::size_t targetCount = trajectoryView ? trajectoryView->currentTargetCount() : static_cast<std::size_t>(kDefaultTargetCount);
+    const std::size_t launchTubeIndex = hasTubeSelection ? selectedTubeIndex : 0;
 
-    if (Simulator::generateScenarioCsv(fileName.toStdString())) {
+    if (Simulator::generateScenarioCsv(fileName.toStdString(), 180, 1, targetCount, selectedTargetIndex, launchTubeIndex)) {
         if (trajectoryView) {
             trajectoryView->setSimulatorDataReady(true);
-            if (hasTubeSelection) {
-                applyTargetsForSelectedTube();
-                trajectoryView->setTubeSelectionConfirmed(true);
-            } else {
-                trajectoryView->setAvailableTargetsForTube({}, {});
-                trajectoryView->setTubeSelectionConfirmed(false);
-            }
-            trajectoryView->clearGraph();
+            trajectoryView->setSelectedTubeIndex(hasTubeSelection ? selectedTubeIndex : 0);
+            trajectoryView->setTubeSelectionConfirmed(hasTubeSelection);
+            trajectoryView->replaySimulation();
         }
         QMessageBox::information(this, tr("Success"),
-                                 tr("Scenario data generated at %1. Now select Tube and Target to display trajectory.")
+                                 tr("Scenario data generated at %1. Now select Target and Tube to display trajectory.")
                                      .arg(QDir::toNativeSeparators(fileName)));
         switchToTrajectoryView();
     } else {
@@ -406,16 +459,10 @@ void Home::switchToTrajectoryView()
         viewStack->setCurrentIndex(3);
         setTubeSelectionMenuVisible(true);
         if (trajectoryView) {
-            trajectoryView->setTargetCount(static_cast<std::size_t>(submarineTubeCount * kTargetsPerTube));
-            if (hasTubeSelection) {
-                applyTargetsForSelectedTube();
-                trajectoryView->setTubeSelectionConfirmed(true);
-                trajectoryView->replaySimulation();
-            } else {
-                trajectoryView->setAvailableTargetsForTube({}, {});
-                trajectoryView->setTubeSelectionConfirmed(false);
-                trajectoryView->clearGraph();
-            }
+            trajectoryView->setTargetCount(static_cast<std::size_t>(kDefaultTargetCount));
+            trajectoryView->setSelectedTubeIndex(hasTubeSelection ? selectedTubeIndex : 0);
+            trajectoryView->setTubeSelectionConfirmed(hasTubeSelection);
+            trajectoryView->replaySimulation();
         }
         qDebug() << "Switched to Trajectory view (index 3)";
     }
@@ -436,7 +483,7 @@ void Home::onTubeSelectionTriggered(QAction *action)
     if (tubeIndex < 0) {
         hasTubeSelection = false;
         if (trajectoryView) {
-            trajectoryView->setAvailableTargetsForTube({}, {});
+            trajectoryView->setSelectedTubeIndex(0);
             trajectoryView->setTubeSelectionConfirmed(false);
             trajectoryView->clearGraph();
         }
@@ -446,10 +493,16 @@ void Home::onTubeSelectionTriggered(QAction *action)
     selectedTubeIndex = static_cast<std::size_t>(tubeIndex);
     hasTubeSelection = true;
     if (trajectoryView) {
-        applyTargetsForSelectedTube();
+        trajectoryView->setSelectedTubeIndex(selectedTubeIndex);
         trajectoryView->setTubeSelectionConfirmed(true);
         trajectoryView->replaySimulation();
     }
+}
+
+void Home::onTargetSectorChanged(bool forwardSector)
+{
+    rebuildTubeSelectionMenu(forwardSector);
+    setTubeSelectionMenuVisible(viewStack && viewStack->currentIndex() == 3);
 }
 
 void Home::setupTubeTargetPools()

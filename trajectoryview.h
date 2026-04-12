@@ -36,8 +36,14 @@ public:
     void setAvailableTargetsForTube(const std::vector<std::size_t>& targetIndices,
                                     const QStringList& targetLabels = QStringList());
     void setTargetCount(std::size_t count);
+    void setSelectedTubeIndex(std::size_t index);
+    std::size_t currentSelectedTargetIndex() const;
+    std::size_t currentTargetCount() const;
     void replaySimulation();
     void clearGraph();
+    
+signals:
+     void targetSectorChanged(bool forwardSector);
 
 private slots:
     void drawSimulationPrototype();
@@ -81,12 +87,14 @@ private:
     bool simulatorDataReady = false;
     bool tubeSelectionConfirmed = false;
     bool targetSelectionConfirmed = false;
+    std::size_t selectedTubeIndex = 0;
     std::size_t selectedTargetIndex = 0;
     std::size_t targetCount = 4;
     std::vector<std::size_t> availableTargetIndices;
     QStringList availableTargetLabels;
     QPointF zoomFocusScenePoint;
     bool hasZoomFocusPoint = false;
+     bool selectedTargetIsForwardSector() const;
     
     void setupUI();
     void initTrajectoryPlot();

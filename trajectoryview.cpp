@@ -142,7 +142,12 @@ void TrajectoryView::setupUI()
                 }
                 selectedTargetIndex = availableTargetIndices[static_cast<std::size_t>(row)];
                 targetSelectionConfirmed = true;
-                replaySimulation();
+                emit targetSectorChanged(selectedTargetIsForwardSector());
+                if (simulatorDataReady) {
+                    replaySimulation();
+                } else {
+                    clearGraph();
+                }
             });
 
     tubeSelectLayout->addWidget(tubeSelect);
@@ -167,7 +172,8 @@ void TrajectoryView::setupUI()
     // Add a container widget for tablePlot to provide margin
     QWidget *tablePlotContainer = new QWidget();
     QVBoxLayout *tablePlotContainerLayout = new QVBoxLayout(tablePlotContainer);
-    tablePlotContainerLayout->setContentsMargins(10, 10, 10, 10); // Add space around the table
+    tablePlotContainerLayout->setContentsMargins(0, 0, 0, 0);
+    tablePlotContainerLayout->setSpacing(0);
     tablePlotContainerLayout->addWidget(tablePlot, 0, Qt::AlignTop);
     tablePlotContainer->setStyleSheet("border: 0.5px solid Whitesmoke;");
     rightLayout->addWidget(tablePlotContainer, 1);
@@ -205,12 +211,12 @@ void TrajectoryView::drawSimulationPrototype()
         return;
     }
 
-    if (!simulatorDataReady || !tubeSelectionConfirmed || !targetSelectionConfirmed) {
+    if (!simulatorDataReady) {
         clearGraph();
         return;
     }
 
-    animatedSamples = Simulator::generateScenarioSamples(180, 1, 0, targetCount, selectedTargetIndex);
+    animatedSamples = Simulator::generateScenarioSamples(180, 1, 0, targetCount, selectedTargetIndex, selectedTubeIndex);
     if (animatedSamples.empty()) {
         return;
     }
@@ -270,7 +276,11 @@ void TrajectoryView::drawSimulationPrototype()
     zoomLevel = 1.0;
     trajectoryPlot->resetTransform();
     trajectoryPlot->fitInView(dynamicSceneRect, Qt::KeepAspectRatio);
-    animationTimer->start();
+
+    // TrajectoryView shows the complete stamped trajectory without animation.
+    while (animationIndex < animatedSamples.size()) {
+        drawNextAnimationFrame();
+    }
 }
 
 void TrajectoryView::setupStaticPlotScaffold()
@@ -393,9 +403,13 @@ void TrajectoryView::drawNextAnimationFrame()
         hasPreviousTorpedoPoint = true;
     }
 
+    const std::size_t stampedFrameIndex = animationIndex;
     ++animationIndex;
 
     updateGeoInfoForSample(sample);
+    if (tablePlot) {
+        tablePlot->updateStampedInfo(sample, stampedFrameIndex);
+    }
 }
 
 bool TrajectoryView::eventFilter(QObject *obj, QEvent *event)
@@ -504,6 +518,8 @@ void TrajectoryView::setSelectedTargetIndex(std::size_t index)
     tubeSelect->setCurrentIndex(targetModelIndex);
     updatingTubeSelection = false;
 
+    emit targetSectorChanged(selectedTargetIsForwardSector());
+
     if (!animatedSamples.empty()) {
         updateGeoInfoForSample(animatedSamples[std::min(animationIndex, animatedSamples.size() - 1)]);
     }
@@ -514,7 +530,6 @@ void TrajectoryView::setAvailableTargetsForTube(const std::vector<std::size_t>& 
 {
     availableTargetIndices = targetIndices;
     availableTargetLabels = targetLabels;
-    targetSelectionConfirmed = false;
     refreshTubeTargetList();
     setSelectedTargetIndex(selectedTargetIndex);
 }
@@ -522,7 +537,6 @@ void TrajectoryView::setAvailableTargetsForTube(const std::vector<std::size_t>& 
 void TrajectoryView::setSimulatorDataReady(bool ready)
 {
     simulatorDataReady = ready;
-    targetSelectionConfirmed = false;
     clearGraph();
 }
 
@@ -548,9 +562,45 @@ void TrajectoryView::setTargetCount(std::size_t count)
         }
         availableTargetLabels.clear();
     }
-    targetSelectionConfirmed = false;
     refreshTubeTargetList();
     setSelectedTargetIndex(selectedTargetIndex);
+}
+
+void TrajectoryView::setSelectedTubeIndex(std::size_t index)
+{
+    selectedTubeIndex = index;
+}
+
+std::size_t TrajectoryView::currentSelectedTargetIndex() const
+{
+    return selectedTargetIndex;
+}
+
+std::size_t TrajectoryView::currentTargetCount() const
+{
+    return targetCount == 0 ? 1 : targetCount;
+}
+
+bool TrajectoryView::selectedTargetIsForwardSector() const
+{
+    const std::size_t safeTargetCount = currentTargetCount();
+    const std::vector<Simulator::Sample> samples = Simulator::generateScenarioSamples(1, 1, 0, safeTargetCount, selectedTargetIndex, selectedTubeIndex);
+    if (samples.empty()) {
+        return true;
+    }
+
+    const Simulator::Sample& sample = samples.front();
+    if (sample.targets.empty() || selectedTargetIndex >= sample.targets.size()) {
+        return true;
+    }
+
+    const auto& target = sample.targets[selectedTargetIndex];
+    const double headingRad = qDegreesToRadians(sample.ownHeadingDeg);
+    const double forwardX = std::sin(headingRad);
+    const double forwardY = std::cos(headingRad);
+    const double relX = target.x - sample.ownX;
+    const double relY = target.y - sample.ownY;
+    return (relX * forwardX) + (relY * forwardY) >= 0.0;
 }
 
 void TrajectoryView::replaySimulation()
@@ -570,7 +620,7 @@ void TrajectoryView::openReplyScreen()
 
     std::vector<Simulator::Sample> samplesToShow = animatedSamples;
     if (samplesToShow.empty()) {
-        samplesToShow = Simulator::generateScenarioSamples(180, 1, 0, targetCount, selectedTargetIndex);
+        samplesToShow = Simulator::generateScenarioSamples(180, 1, 0, targetCount, selectedTargetIndex, selectedTubeIndex);
     }
 
     if (samplesToShow.empty()) {
@@ -664,4 +714,8 @@ void TrajectoryView::clearGraph()
     zoomLevel = 1.0;
     trajectoryPlot->resetTransform();
     trajectoryPlot->fitInView(dynamicSceneRect, Qt::KeepAspectRatio);
+
+    if (tablePlot) {
+        tablePlot->clearStampedInfo();
+    }
 }

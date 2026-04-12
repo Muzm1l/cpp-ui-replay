@@ -14,6 +14,13 @@ namespace {
 
 constexpr double kPi = 3.14159265358979323846;
 constexpr double kKnotsToMetersPerSecond = 0.514444;
+constexpr std::uint32_t kStableScenarioSeed = 20260412u;
+constexpr int kTubeCount = 3;
+
+bool isForwardTube(int tubeIndex) {
+    // Tube 1 and Tube 2 are forward-facing, Tube 3 is backward-facing.
+    return tubeIndex < 2;
+}
 
 double toRadians(double degrees) {
     return degrees * (kPi / 180.0);
@@ -49,13 +56,14 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds,
                                              int stepSeconds,
                                              std::uint32_t seed,
                                              std::size_t targetCount,
-                                             std::size_t selectedTargetIndex) {
+                                             std::size_t selectedTargetIndex,
+                                             std::size_t launchTubeIndex) {
     std::vector<Sample> samples;
     if (durationSeconds <= 0 || stepSeconds <= 0) {
         return samples;
     }
 
-    std::mt19937 generator(seed == 0 ? std::random_device{}() : seed);
+    std::mt19937 generator(seed == 0 ? kStableScenarioSeed : seed);
     std::uniform_real_distribution<double> ownSpeedKnotsDist(10.0, 16.0);
     std::uniform_real_distribution<double> ownHeadingDist(20.0, 55.0);
     std::uniform_real_distribution<double> targetSpeedKnotsDist(8.0, 22.0);
@@ -89,6 +97,19 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds,
 
     const int torpedoLaunchTimeSec = 22;
     const double torpedoSpeedKnots = 42.0;
+    const int safeTubeIndex = static_cast<int>(launchTubeIndex % static_cast<std::size_t>(kTubeCount));
+    const bool launchFromForwardTube = isForwardTube(safeTubeIndex);
+    const double kForwardAftOffsetMeters = 12.0;
+    const double kPortStarboardOffsetMeters = 6.0;
+
+    double longitudinalOffsetMeters = launchFromForwardTube ? kForwardAftOffsetMeters : -kForwardAftOffsetMeters;
+    double lateralOffsetMeters = 0.0;
+    if (safeTubeIndex == 0) {
+        lateralOffsetMeters = -kPortStarboardOffsetMeters;
+    } else if (safeTubeIndex == 1) {
+        lateralOffsetMeters = kPortStarboardOffsetMeters;
+    }
+
     bool torpedoLaunched = false;
     bool torpedoHitTarget = false;
     double torpedoX = 0.0;
@@ -129,11 +150,23 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds,
         const std::size_t selectedIndex = std::min(selectedTargetIndex, targets.size() - 1);
         const TargetState& selectedTarget = targets[selectedIndex];
 
+        const double ownForwardX = std::sin(ownHeadingRad);
+        const double ownForwardY = std::cos(ownHeadingRad);
+        const double ownStarboardX = std::cos(ownHeadingRad);
+        const double ownStarboardY = -std::sin(ownHeadingRad);
+
+        const double targetRelX = selectedTarget.x - ownX;
+        const double targetRelY = selectedTarget.y - ownY;
+        const double forwardProjection = (targetRelX * ownForwardX) + (targetRelY * ownForwardY);
+        const bool targetInForwardSector = forwardProjection >= 0.0;
+        const bool tubeCanEngageTarget = launchFromForwardTube ? targetInForwardSector : !targetInForwardSector;
+
         double torpedoSpeedOut = 0.0;
-        if (!torpedoLaunched && elapsed >= torpedoLaunchTimeSec) {
+        if (!torpedoLaunched && elapsed >= torpedoLaunchTimeSec && tubeCanEngageTarget) {
             torpedoLaunched = true;
-            torpedoX = ownX;
-            torpedoY = ownY;
+            // Launch from forward or aft section, plus port/starboard tube spacing.
+            torpedoX = ownX + (longitudinalOffsetMeters * ownForwardX) + (lateralOffsetMeters * ownStarboardX);
+            torpedoY = ownY + (longitudinalOffsetMeters * ownForwardY) + (lateralOffsetMeters * ownStarboardY);
         }
 
         if (torpedoLaunched && !torpedoHitTarget) {
@@ -180,7 +213,12 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds,
     return samples;
 }
 
-bool generateSimulatorCsv(const std::string& filePath, int durationSeconds, int stepSeconds) {
+bool generateSimulatorCsv(const std::string& filePath,
+                          int durationSeconds,
+                          int stepSeconds,
+                          std::size_t targetCount,
+                          std::size_t selectedTargetIndex,
+                          std::size_t launchTubeIndex) {
     if (filePath.empty()) {
         return false;
     }
@@ -190,7 +228,12 @@ bool generateSimulatorCsv(const std::string& filePath, int durationSeconds, int 
         return false;
     }
 
-    const std::vector<Sample> samples = generateSimulatorSamples(durationSeconds, stepSeconds);
+    const std::vector<Sample> samples = generateSimulatorSamples(durationSeconds,
+                                                                 stepSeconds,
+                                                                 0,
+                                                                 targetCount,
+                                                                 selectedTargetIndex,
+                                                                 launchTubeIndex);
     if (samples.empty()) {
         return false;
     }
@@ -220,12 +263,28 @@ std::vector<Sample> generateScenarioSamples(int durationSeconds,
                                             int stepSeconds,
                                             std::uint32_t seed,
                                             std::size_t targetCount,
-                                            std::size_t selectedTargetIndex) {
-    return generateSimulatorSamples(durationSeconds, stepSeconds, seed, targetCount, selectedTargetIndex);
+                                            std::size_t selectedTargetIndex,
+                                            std::size_t launchTubeIndex) {
+    return generateSimulatorSamples(durationSeconds,
+                                    stepSeconds,
+                                    seed,
+                                    targetCount,
+                                    selectedTargetIndex,
+                                    launchTubeIndex);
 }
 
-bool generateScenarioCsv(const std::string& filePath, int durationSeconds, int stepSeconds) {
-    return generateSimulatorCsv(filePath, durationSeconds, stepSeconds);
+bool generateScenarioCsv(const std::string& filePath,
+                         int durationSeconds,
+                         int stepSeconds,
+                         std::size_t targetCount,
+                         std::size_t selectedTargetIndex,
+                         std::size_t launchTubeIndex) {
+    return generateSimulatorCsv(filePath,
+                                durationSeconds,
+                                stepSeconds,
+                                targetCount,
+                                selectedTargetIndex,
+                                launchTubeIndex);
 }
 
 } // namespace Simulator

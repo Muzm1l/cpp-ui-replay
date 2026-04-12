@@ -24,6 +24,7 @@ SOURCES += \
     eventview.cpp \
     parametrview.cpp \
     trajectoryview.cpp \
+    scaleview.cpp \
     geographicalinfo.cpp \
     acousticpanorama.cpp \
     demongraph.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     eventview.h \
     parametrview.h \
     trajectoryview.h \
+    scaleview.h \
     geographicalinfo.h \
     acousticpanorama.h \
     demongraph.h \

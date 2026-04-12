@@ -21,6 +21,8 @@
 #include "geographicalinfo.h"
 #include "parserdialog.h"
 
+const QString MENUBAR_NAME = "mainMenuBar";
+
 class Home : public QMainWindow
 {
     Q_OBJECT
@@ -42,6 +44,7 @@ private slots:
     void onPrintTrajectoryView();
     void onEventRowClicked(int row);
     void onTubeSelectionTriggered(QAction *action);
+    void onTargetSectorChanged(bool forwardSector);
 
 private:
     // Central widget and main layout
@@ -98,6 +101,7 @@ private:
     void setupViewStack();
     void setupHomeWidget();
     void setupTubeSelectionMenu(int tubeCount);
+    void rebuildTubeSelectionMenu(bool forwardSector);
     void setTubeSelectionMenuVisible(bool visible);
     void setupTubeTargetPools();
     void applyTargetsForSelectedTube();

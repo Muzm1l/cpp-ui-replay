@@ -37,16 +37,28 @@ std::vector<Sample> generateSimulatorSamples(int durationSeconds = 180,
                                              int stepSeconds = 1,
                                              std::uint32_t seed = 0,
                                              std::size_t targetCount = 4,
-                                             std::size_t selectedTargetIndex = 0);
-bool generateSimulatorCsv(const std::string& filePath, int durationSeconds = 180, int stepSeconds = 1);
+                                             std::size_t selectedTargetIndex = 0,
+                                             std::size_t launchTubeIndex = 0);
+bool generateSimulatorCsv(const std::string& filePath,
+                          int durationSeconds = 180,
+                          int stepSeconds = 1,
+                          std::size_t targetCount = 4,
+                          std::size_t selectedTargetIndex = 0,
+                          std::size_t launchTubeIndex = 0);
 
 // New aliases for clearer naming
 std::vector<Sample> generateScenarioSamples(int durationSeconds = 180,
                                             int stepSeconds = 1,
                                             std::uint32_t seed = 0,
                                             std::size_t targetCount = 4,
-                                            std::size_t selectedTargetIndex = 0);
-bool generateScenarioCsv(const std::string& filePath, int durationSeconds = 180, int stepSeconds = 1);
+                                            std::size_t selectedTargetIndex = 0,
+                                            std::size_t launchTubeIndex = 0);
+bool generateScenarioCsv(const std::string& filePath,
+                         int durationSeconds = 180,
+                         int stepSeconds = 1,
+                         std::size_t targetCount = 4,
+                         std::size_t selectedTargetIndex = 0,
+                         std::size_t launchTubeIndex = 0);
 
 } // namespace Simulator
 

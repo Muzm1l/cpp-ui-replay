@@ -114,6 +114,7 @@ QLabel#geoHeaderLabel {
 QTableWidget#geoTable {
     background: transparent;
     gridline-color: rgba(255, 255, 255, 0);
+    font-size: 16px;
 }
 
 QTableWidget#geoTable QWidget {
@@ -233,7 +234,7 @@ QTableWidget#trajectoryTableWidget QWidget {
 QTableWidget#trajectoryTableWidget QHeaderView::section {
     border-right: 1px solid #ffffff;
     border-bottom: 1px solid #ffffff;
-    padding: 1px 6px;
+    padding: 0px 6px;
     background: #2b7fb8;
     color: white;
 }
@@ -257,7 +258,7 @@ QTableWidget#trajectorySubTable QHeaderView::section,
 QTableWidget#torpedoSubTable QHeaderView::section {
     border-right: 0px;
     border-bottom: 1px solid #ffffff;
-    padding: 1px 6px;
+    padding: 0px 6px;
     background: transparent; 
     color: #39ff14;
     font-weight: bold;

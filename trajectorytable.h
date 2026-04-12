@@ -7,7 +7,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
-#include <QScrollBar>
+#include "simulator.h"
 
 /**
  * @class TableColumn
@@ -124,22 +124,28 @@ class TrajectoryTable : public QWidget {
     Q_OBJECT
 public:
     explicit TrajectoryTable(QWidget *parent = nullptr);
+    void updateStampedInfo(const Simulator::Sample& sample, std::size_t stampedIndex);
+    void clearStampedInfo();
     
 protected:
     void resizeEvent(QResizeEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
     
 signals:
     void closeRequested();
 private:
-    QTableWidget *createColumnTable(const QString &header, const QStringList &rows, bool enableVerticalScroll, int totalRows, int subColumnCount);
+    QTableWidget *createColumnTable(const QString &header, const QStringList &rows, int totalRows, int subColumnCount);
     void updateColumnWidths();
-    void adjustTorpedoScrollbarGeometry();
-    void syncTorpedoExternalScrollbar();
     
     QPushButton *closeButton = nullptr;
     QVector<QTableWidget*> m_columnTables;
     QTableWidget *m_torpedoTable = nullptr;
-    QScrollBar *m_torpedoExternalScrollBar = nullptr;
+
+    QTableWidget *m_dateTable = nullptr;
+    QTableWidget *m_ownshipTable = nullptr;
+    QTableWidget *m_targetTable = nullptr;
+
+    void setCellText(QTableWidget *table, int row, int col, const QString &text);
 };
 
 #endif // TRAJECTORYTABLE_H
