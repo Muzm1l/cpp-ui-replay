@@ -1,5 +1,10 @@
 # Build directories
 build/
+*.o
+*.a
+*.so
+*.dll
+*.exe
 
 # Qt/qmake generated files
 moc/
@@ -47,3 +52,17 @@ Thumbs.db
 *.stash
 .qmake.stash
 
+
+# Qt specific
+*.pro.user
+*.qrc.depends
+moc_*.cpp
+ui_*.h
+
+# Generated output
+#output/
+#*.csv
+
+# OS
+.DS_Store
+Thumbs.db
