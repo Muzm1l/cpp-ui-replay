@@ -91,7 +91,7 @@ private:
     
     QString currentDatFilePath;
     int submarineTubeCount;
-    std::size_t selectedTubeIndex;
+    int selectedTubeIndex;
     bool hasTubeSelection;
     std::vector<std::vector<std::size_t>> tubeTargetIndexPools;
     std::vector<QStringList> tubeTargetLabelPools;
@@ -103,6 +103,7 @@ private:
     void setupTubeSelectionMenu(int tubeCount);
     void rebuildTubeSelectionMenu(bool forwardSector);
     void setTubeSelectionMenuVisible(bool visible);
+    void updateTubeSelectionMenuTitle();
     void setupTubeTargetPools();
     void applyTargetsForSelectedTube();
     void initTrajectoryPlot();

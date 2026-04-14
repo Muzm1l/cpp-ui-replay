@@ -21,6 +21,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSizePolicy>
+#include <QFrame>
 #include <QtMath>
 #include <algorithm>
 #include <cstdlib>
@@ -84,6 +85,8 @@ void TrajectoryView::setupUI()
     geoInfo = new GeographicalInfo();
     geoInfo->setFixedWidthMode(true, 400);
     leftLayout->addWidget(geoInfo);
+        connect(geoInfo, &GeographicalInfo::currentTimeEdited,
+            this, &TrajectoryView::onCurrentTimeEdited);
     
     // Vertical spacer
     leftLayout->addStretch();
@@ -140,9 +143,14 @@ void TrajectoryView::setupUI()
                 if (row < 0 || static_cast<std::size_t>(row) >= availableTargetIndices.size()) {
                     return;
                 }
+
                 selectedTargetIndex = availableTargetIndices[static_cast<std::size_t>(row)];
                 targetSelectionConfirmed = true;
                 emit targetSectorChanged(selectedTargetIsForwardSector());
+                if (tablePlot) {
+                    tablePlot->hide();
+                    updateTableStackScrollPolicy();
+                }
                 if (simulatorDataReady) {
                     replaySimulation();
                 } else {
@@ -167,14 +175,26 @@ void TrajectoryView::setupUI()
     
     // Table Plot
     
-    tablePlot = new TrajectoryTable();
-    tablePlot->setStyleSheet("border: 0.5px solid whitesmoke;");
-    // Add a container widget for tablePlot to provide margin
+    // Add a container widget for stacked trajectory tables
     QWidget *tablePlotContainer = new QWidget();
-    QVBoxLayout *tablePlotContainerLayout = new QVBoxLayout(tablePlotContainer);
+    QVBoxLayout *tableContainerLayout = new QVBoxLayout(tablePlotContainer);
+    tableContainerLayout->setContentsMargins(0, 0, 0, 0);
+    tableContainerLayout->setSpacing(0);
+
+    tablePlotScrollArea = new QScrollArea(tablePlotContainer);
+    tablePlotScrollArea->setFrameShape(QFrame::NoFrame);
+    tablePlotScrollArea->setWidgetResizable(true);
+    tablePlotScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    tablePlotScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QWidget *tableStackWidget = new QWidget(tablePlotScrollArea);
+    tablePlotContainerLayout = new QVBoxLayout(tableStackWidget);
     tablePlotContainerLayout->setContentsMargins(0, 0, 0, 0);
     tablePlotContainerLayout->setSpacing(0);
-    tablePlotContainerLayout->addWidget(tablePlot, 0, Qt::AlignTop);
+    tablePlotScrollArea->setWidget(tableStackWidget);
+    tableContainerLayout->addWidget(tablePlotScrollArea);
+
+    createNewTablePlot(false);
     tablePlotContainer->setStyleSheet("border: 0.5px solid Whitesmoke;");
     rightLayout->addWidget(tablePlotContainer, 1);
     
@@ -281,6 +301,10 @@ void TrajectoryView::drawSimulationPrototype()
     while (animationIndex < animatedSamples.size()) {
         drawNextAnimationFrame();
     }
+
+    // Draw circular dots at the head positions
+    drawHeadDots();
+
 }
 
 void TrajectoryView::setupStaticPlotScaffold()
@@ -403,12 +427,50 @@ void TrajectoryView::drawNextAnimationFrame()
         hasPreviousTorpedoPoint = true;
     }
 
-    const std::size_t stampedFrameIndex = animationIndex;
     ++animationIndex;
 
     updateGeoInfoForSample(sample);
-    if (tablePlot) {
-        tablePlot->updateStampedInfo(sample, stampedFrameIndex);
+}
+
+void TrajectoryView::drawHeadDots()
+{
+    // Draw circular dots at the head positions of all tracks
+    const double dotRadius = 5.0;
+
+    // Draw ownship head dot (cyan)
+    if (hasPreviousOwnshipPoint) {
+        auto* ownshipDot = trajectoryScene->addEllipse(
+            previousOwnshipPoint.x() - dotRadius,
+            previousOwnshipPoint.y() - dotRadius,
+            dotRadius * 2.0,
+            dotRadius * 2.0
+        );
+        ownshipDot->setPen(QPen(QColor(0, 255, 255), 2));
+        ownshipDot->setBrush(QBrush(QColor(0, 255, 255)));
+    }
+
+    // Draw selected target head dot (red)
+    if (hasPreviousTargetPoint) {
+        auto* targetDot = trajectoryScene->addEllipse(
+            previousTargetPoint.x() - dotRadius,
+            previousTargetPoint.y() - dotRadius,
+            dotRadius * 2.0,
+            dotRadius * 2.0
+        );
+        targetDot->setPen(QPen(QColor(220, 80, 80), 2));
+        targetDot->setBrush(QBrush(QColor(220, 80, 80)));
+    }
+
+    // Draw torpedo head dot (blue)
+    if (hasPreviousTorpedoPoint) {
+        auto* torpedoDot = trajectoryScene->addEllipse(
+            previousTorpedoPoint.x() - dotRadius,
+            previousTorpedoPoint.y() - dotRadius,
+            dotRadius * 2.0,
+            dotRadius * 2.0
+        );
+        torpedoDot->setPen(QPen(QColor(0, 120, 255), 2));
+        torpedoDot->setBrush(QBrush(QColor(0, 120, 255)));
     }
 }
 
@@ -717,5 +779,71 @@ void TrajectoryView::clearGraph()
 
     if (tablePlot) {
         tablePlot->clearStampedInfo();
+        tablePlot->hide();
+        updateTableStackScrollPolicy();
     }
+}
+
+void TrajectoryView::onCurrentTimeEdited(float seconds)
+{
+    if (!tablePlot) {
+        return;
+    }
+
+    if (animatedSamples.empty()) {
+        animatedSamples = Simulator::generateScenarioSamples(180,
+                                                             1,
+                                                             0,
+                                                             targetCount,
+                                                             selectedTargetIndex,
+                                                             selectedTubeIndex);
+    }
+
+    if (animatedSamples.empty()) {
+        return;
+    }
+
+    const std::size_t frameCount = animatedSamples.size();
+    const std::size_t requestedIndex = static_cast<std::size_t>(std::max(0.0f, std::round(seconds)));
+    const std::size_t frameIndex = std::min(requestedIndex, frameCount - 1);
+
+    tablePlot->updateStampedInfo(animatedSamples[frameIndex], frameIndex);
+    tablePlot->show();
+    updateTableStackScrollPolicy();
+
+    updateGeoInfoForSample(animatedSamples[frameIndex]);
+    if (geoInfo) {
+        geoInfo->setCurrentTime(seconds);
+    }
+}
+
+void TrajectoryView::createNewTablePlot(bool visible)
+{
+    if (!tablePlotContainerLayout) {
+        return;
+    }
+
+    tablePlot = new TrajectoryTable(this);
+    tablePlot->setStyleSheet("border: 0.5px solid whitesmoke;");
+    tablePlotContainerLayout->insertWidget(0, tablePlot, 0, Qt::AlignTop);
+    tablePlot->setVisible(visible);
+    updateTableStackScrollPolicy();
+}
+
+void TrajectoryView::updateTableStackScrollPolicy()
+{
+    if (!tablePlotScrollArea || !tablePlotContainerLayout) {
+        return;
+    }
+
+    int visibleTableCount = 0;
+    for (int i = 0; i < tablePlotContainerLayout->count(); ++i) {
+        QWidget *widget = tablePlotContainerLayout->itemAt(i)->widget();
+        if (qobject_cast<TrajectoryTable*>(widget) && widget->isVisible()) {
+            ++visibleTableCount;
+        }
+    }
+
+    tablePlotScrollArea->setVerticalScrollBarPolicy(
+        visibleTableCount > 3 ? Qt::ScrollBarAsNeeded : Qt::ScrollBarAlwaysOff);
 }

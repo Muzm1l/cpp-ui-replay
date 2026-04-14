@@ -264,7 +264,7 @@ void ScaleView::paintEvent(QPaintEvent *event)
     const QString title = QStringLiteral("Time Range : %1").arg(horizonText);
 
     QFont headerFont = font();
-    headerFont.setPointSize(qBound(9, availableHeight / 10, 13));
+    headerFont.setPointSize(qBound(11, availableHeight / 10, 15));
     headerFont.setBold(false);
     painter.setFont(headerFont);
     painter.setPen(QColor(240, 240, 240));
@@ -282,14 +282,16 @@ void ScaleView::paintEvent(QPaintEvent *event)
 
     const QRectF selectionRect = selectionRectForContent(content);
     if (selectionRect.isValid()) {
-        QPen selectionPen(QColor(220, 220, 220, 210));
-        selectionPen.setWidth(1);
+        // Fill with semi-transparent gray
+        painter.setBrush(QColor(120, 120, 120, 100));
+        QPen selectionPen(QColor(180, 180, 180, 220));
+        selectionPen.setWidth(2);
         painter.setPen(selectionPen);
-        painter.setBrush(Qt::NoBrush);
         painter.drawRect(selectionRect);
 
-        QPen handlePen(QColor(220, 220, 220, 230));
-        handlePen.setWidth(2);
+        // Draw left and right draggable handles
+        QPen handlePen(QColor(200, 200, 200, 230));
+        handlePen.setWidth(3);
         painter.setPen(handlePen);
         painter.drawLine(QPointF(selectionRect.left(), selectionRect.top()), QPointF(selectionRect.left(), selectionRect.bottom()));
         painter.drawLine(QPointF(selectionRect.right(), selectionRect.top()), QPointF(selectionRect.right(), selectionRect.bottom()));
@@ -304,7 +306,7 @@ void ScaleView::paintEvent(QPaintEvent *event)
     }
 
     QFont markerFont = font();
-    markerFont.setPointSize(qBound(8, availableHeight / 9, 12));
+    markerFont.setPointSize(qBound(10, availableHeight / 9, 14));
     painter.setFont(markerFont);
     const QFontMetrics markerMetrics(markerFont);
 
@@ -366,16 +368,7 @@ void ScaleView::paintEvent(QPaintEvent *event)
         }
     }
 
-    // Arrow at the end of the full time scale.
-    const double arrowTipX = content.right() - 1.0;
-    const double arrowTipY = axisY;
-    QPolygonF arrow;
-    arrow << QPointF(arrowTipX, arrowTipY)
-          << QPointF(arrowTipX - 10.0, arrowTipY - 7.0)
-          << QPointF(arrowTipX - 10.0, arrowTipY + 7.0);
-    painter.setPen(QPen(QColor(200, 200, 200), 1));
-    painter.setBrush(QColor(200, 200, 200));
-    painter.drawPolygon(arrow);
+
 }
 
 void ScaleView::mousePressEvent(QMouseEvent *event)

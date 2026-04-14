@@ -62,6 +62,7 @@ public:
 
 signals:
     void dataChanged();
+    void currentTimeEdited(float seconds);
 
 private:
     QVBoxLayout *mainLayout;
@@ -71,6 +72,10 @@ private:
     void setupUI();
     void setupTable();
     void updateValue(int row, const QString& value);
+    
+    // Helper methods for time conversion
+    QString secondsToTimeFormat(float seconds);
+    float timeFormatToSeconds(const QString& timeStr);
     
     enum GeoRow {
         ROW_CURRENT_TIME = 0,

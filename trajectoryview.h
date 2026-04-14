@@ -11,6 +11,8 @@
 #include <QPushButton>
 #include <QColumnView>
 #include <QStringListModel>
+#include <QVBoxLayout>
+#include <QScrollArea>
 #include "geographicalinfo.h"
 #include "trajectorytable.h"
 #include "acousticpanorama.h"
@@ -48,7 +50,9 @@ signals:
 private slots:
     void drawSimulationPrototype();
     void drawNextAnimationFrame();
+    void drawHeadDots();
     void openReplyScreen();
+    void onCurrentTimeEdited(float seconds);
 
 private:
     // Main layout widgets
@@ -56,6 +60,8 @@ private:
     QColumnView *tubeSelect;
     QStringListModel *tubeSelectModel;
     TrajectoryTable *tablePlot;
+    QVBoxLayout *tablePlotContainerLayout = nullptr;
+    QScrollArea *tablePlotScrollArea = nullptr;
     
     // Left side widgets
     AcousticPanorama *acousticPanorama;
@@ -104,6 +110,8 @@ private:
     void updateAxesPosition();
     void refreshTubeTargetList();
     void updateGeoInfoForSample(const Simulator::Sample& sample);
+    void createNewTablePlot(bool visible = false);
+    void updateTableStackScrollPolicy();
     
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

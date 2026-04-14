@@ -87,6 +87,12 @@ void GeographicalInfo::setupTable()
     geoTable->setGridStyle(Qt::SolidLine);
     geoTable->horizontalHeader()->setVisible(false);
     geoTable->verticalHeader()->setVisible(false);
+    geoTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    geoTable->setSelectionBehavior(QAbstractItemView::SelectItems);
+    geoTable->setEditTriggers(QAbstractItemView::DoubleClicked |
+                              QAbstractItemView::SelectedClicked |
+                              QAbstractItemView::EditKeyPressed |
+                              QAbstractItemView::AnyKeyPressed);
     
     // Set column widths
     geoTable->setColumnWidth(0, 225);
@@ -111,6 +117,7 @@ void GeographicalInfo::setupTable()
         QTableWidgetItem *valueItem = new QTableWidgetItem("--");
         if (i == ROW_CURRENT_TIME) {
             valueItem->setFlags(valueItem->flags() | Qt::ItemIsEditable);
+            valueItem->setToolTip("Enter time as hh:mm:ss or seconds");
         } else {
             valueItem->setFlags(valueItem->flags() & ~Qt::ItemIsEditable);
         }
@@ -123,17 +130,14 @@ void GeographicalInfo::setupTable()
         }
 
         QString text = item->text().trimmed();
-        text.replace("s", "", Qt::CaseInsensitive);
-        text = text.trimmed();
-
-        bool ok = false;
-        const float currentTime = text.toFloat(&ok);
-        if (!ok) {
+        float currentTime = timeFormatToSeconds(text);
+        if (currentTime < 0) {
             return;
         }
 
         const QSignalBlocker blocker(geoTable);
-        item->setText(QString::number(currentTime, 'f', 2) + " s");
+        item->setText(secondsToTimeFormat(currentTime));
+        emit currentTimeEdited(currentTime);
         emit dataChanged();
     });
     
@@ -152,7 +156,7 @@ void GeographicalInfo::updateValue(int row, const QString& value)
 
 void GeographicalInfo::setCurrentTime(float time)
 {
-    updateValue(ROW_CURRENT_TIME, QString::number(time, 'f', 2) + " s");
+    updateValue(ROW_CURRENT_TIME, secondsToTimeFormat(time));
     emit dataChanged();
 }
 
@@ -270,4 +274,45 @@ void GeographicalInfo::setFixedWidthMode(bool enabled, int width)
         geoTable->setMaximumWidth(QWIDGETSIZE_MAX);
         headerLabel->setMaximumWidth(QWIDGETSIZE_MAX);
     }
+}
+
+QString GeographicalInfo::secondsToTimeFormat(float seconds)
+{
+    int totalSeconds = static_cast<int>(seconds);
+    int hours = totalSeconds / 3600;
+    int minutes = (totalSeconds % 3600) / 60;
+    int secs = totalSeconds % 60;
+    
+    return QString("%1:%2:%3")
+        .arg(hours, 2, 10, QLatin1Char('0'))
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(secs, 2, 10, QLatin1Char('0'));
+}
+
+float GeographicalInfo::timeFormatToSeconds(const QString& timeStr)
+{
+    bool okSeconds = false;
+    const float rawSeconds = timeStr.toFloat(&okSeconds);
+    if (okSeconds && rawSeconds >= 0.0f) {
+        return rawSeconds;
+    }
+
+    // Parse hh:mm:ss format
+    QStringList parts = timeStr.split(':');
+    if (parts.length() != 3) {
+        return -1.0f;
+    }
+    
+    bool okHours = false;
+    bool okMinutes = false;
+    bool okSecs = false;
+    int hours = parts[0].toInt(&okHours);
+    int minutes = parts[1].toInt(&okMinutes);
+    int seconds = parts[2].toInt(&okSecs);
+    
+    if (!okHours || !okMinutes || !okSecs || hours < 0 || minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) {
+        return -1.0f;
+    }
+    
+    return static_cast<float>(hours * 3600 + minutes * 60 + seconds);
 }

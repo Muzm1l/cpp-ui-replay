@@ -229,6 +229,49 @@ void ReplyScreen::renderTrajectoryFrame(std::size_t visibleSampleCount)
     }
 
     drawScaleBar(sceneRect, sceneScale);
+
+        // Draw circular dots at the head positions
+        const double dotRadius = 5.0;
+    
+        if (drawSampleCount > 0) {
+            const auto& lastSample = replaySamples[drawSampleCount - 1];
+        
+            // Draw ownship head dot (cyan)
+            const QPointF lastOwnship = toScenePoint(lastSample.ownX - ownshipOriginX, lastSample.ownY - ownshipOriginY);
+            auto* ownshipDot = trajectoryScene->addEllipse(
+                lastOwnship.x() - dotRadius,
+                lastOwnship.y() - dotRadius,
+                dotRadius * 2.0,
+                dotRadius * 2.0
+            );
+            ownshipDot->setPen(QPen(QColor(0, 255, 255), 2));
+            ownshipDot->setBrush(QBrush(QColor(0, 255, 255)));
+        
+            // Draw selected target head dot (red)
+            const QPointF lastTarget = toScenePoint(lastSample.targetX - ownshipOriginX, lastSample.targetY - ownshipOriginY);
+            auto* targetDot = trajectoryScene->addEllipse(
+                lastTarget.x() - dotRadius,
+                lastTarget.y() - dotRadius,
+                dotRadius * 2.0,
+                dotRadius * 2.0
+            );
+            targetDot->setPen(QPen(QColor(220, 80, 80), 2));
+            targetDot->setBrush(QBrush(QColor(220, 80, 80)));
+        
+            // Draw torpedo head dot (blue)
+            if (lastSample.torpedoSpeedKnots > 0.0) {
+                const QPointF lastTorpedo = toScenePoint(lastSample.torpedoX - ownshipOriginX, lastSample.torpedoY - ownshipOriginY);
+                auto* torpedoDot = trajectoryScene->addEllipse(
+                    lastTorpedo.x() - dotRadius,
+                    lastTorpedo.y() - dotRadius,
+                    dotRadius * 2.0,
+                    dotRadius * 2.0
+                );
+                torpedoDot->setPen(QPen(QColor(0, 120, 255), 2));
+                torpedoDot->setBrush(QBrush(QColor(0, 120, 255)));
+            }
+        }
+
     trajectoryGraphView->resetTransform();
     trajectoryGraphView->fitInView(sceneRect.adjusted(10.0, 10.0, -10.0, -10.0), Qt::KeepAspectRatio);
 }

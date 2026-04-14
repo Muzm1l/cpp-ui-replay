@@ -77,7 +77,7 @@ Home::Home(QWidget *parent)
     , geoInfo(nullptr)
     , trajectoryScene(nullptr)
     , submarineTubeCount(kDefaultSubmarineTubeCount)
-    , selectedTubeIndex(0)
+    , selectedTubeIndex(-1)
     , hasTubeSelection(false)
 {
     // Setup the window
@@ -468,6 +468,19 @@ void Home::switchToTrajectoryView()
     }
 }
 
+void Home::updateTubeSelectionMenuTitle()
+{
+    if (!menuTubeSelection) {
+        return;
+    }
+
+    QString newTitle = "Tube Selection";
+    if (hasTubeSelection) {
+        newTitle = QString("Tube %1").arg(static_cast<int>(selectedTubeIndex) + 1);
+    }
+    menuTubeSelection->setTitle(newTitle);
+}
+
 void Home::onTubeSelectionTriggered(QAction *action)
 {
     if (!action) {
@@ -487,6 +500,7 @@ void Home::onTubeSelectionTriggered(QAction *action)
             trajectoryView->setTubeSelectionConfirmed(false);
             trajectoryView->clearGraph();
         }
+        updateTubeSelectionMenuTitle();
         return;
     }
 
@@ -497,6 +511,7 @@ void Home::onTubeSelectionTriggered(QAction *action)
         trajectoryView->setTubeSelectionConfirmed(true);
         trajectoryView->replaySimulation();
     }
+    updateTubeSelectionMenuTitle();
 }
 
 void Home::onTargetSectorChanged(bool forwardSector)
